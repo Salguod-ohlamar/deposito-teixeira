@@ -286,6 +286,7 @@ const StockControl = ({ onLogout, currentUser }) => {
                   {hasAdminAccessPermission && (
                       <button onClick={() => navigate('/admin')} className="inline-flex items-center gap-2 text-white hover:bg-white/20 p-2 rounded-md transition-colors" title="Painel de Administração">
                           <Settings size={20} />
+                          
                           <span className="hidden sm:inline">Administração</span>
                       </button>
                   )}

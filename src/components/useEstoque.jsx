@@ -99,12 +99,48 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const API_URL = import.meta.env.VITE_API_URL || '';
 
+    // Helper to handle 401 responses and force logout
+    const handleUnauthorized = () => {
+        toast.error('Sessão expirada ou não autorizada. Por favor, faça login novamente.');
+        setCurrentUser(null); // Clear current user state
+        localStorage.removeItem('boycell-token'); // Clear token
+        // The ProtectedRoute in App.jsx will handle the redirection to login.
+    };
+
+    // Generic function for authenticated API requests
+    const makeAuthRequest = async (url, options = {}) => {
+        const token = localStorage.getItem('boycell-token');
+        if (!token) {
+            handleUnauthorized();
+            throw new Error('No authentication token found.'); // Prevent API call
+        }
+
+        const defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...defaultHeaders,
+                ...options.headers,
+            },
+        });
+
+        if (response.status === 401) {
+            handleUnauthorized();
+            throw new Error('Unauthorized access: Token invalid or expired.');
+        }
+        return response; // Return the response for further processing (e.g., .json())
+    };
+
     // Efeito para buscar os produtos da API quando o componente montar
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoadingEstoque(true);
-                const response = await fetch(`${API_URL}/api/products`);
+                const response = await makeAuthRequest(`${API_URL}/api/products`, { method: 'GET' });
                 if (!response.ok) {
                     throw new Error('Falha ao buscar produtos do servidor');
                 }
@@ -125,9 +161,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 setLoadingEstoque(false);
             }
         };
-
-        fetchProducts();
-    }, []); // O array vazio [] garante que isso rode apenas uma vez
+        if (currentUser) { // Only fetch if a user is logged in
+            fetchProducts();
+        }
+    }, [currentUser]); // Depend on currentUser
 
     // State for stock value history
     const [stockValueHistory, setStockValueHistory] = useState(() => {
@@ -163,7 +200,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         const fetchServicos = async () => {
             try {
                 setLoadingServicos(true);
-                const response = await fetch(`${API_URL}/api/services`);
+                const response = await makeAuthRequest(`${API_URL}/api/services`, { method: 'GET' });
                 if (!response.ok) throw new Error('Falha ao buscar serviços do servidor');
                 const data = await response.json();
                 // Garante que os campos numéricos sejam do tipo correto
@@ -174,6 +211,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 }));
                 setServicos(parsedData);
             } catch (error) {
+                if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
                 console.error("Erro ao buscar serviços da API:", error);
                 console.log('Info: Não foi possível carregar os serviços. Isso pode ocorrer se não houver serviços cadastrados ou por um erro de conexão.');
             } finally {
@@ -200,13 +238,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     useEffect(() => {
         const fetchSalesHistory = async () => {
             try {
-                const token = localStorage.getItem('boycell-token');
-                if (!token) {
-                    setSalesHistory([]); // Limpa o histórico se não houver token
-                    return;
-                }
-                const response = await fetch(`${API_URL}/api/sales`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const response = await makeAuthRequest(`${API_URL}/api/sales`, {
+                    method: 'GET',
+                    // Headers are added by makeAuthRequest
                 });
                 if (!response.ok) throw new Error('Falha ao buscar histórico de vendas.');
                 const data = await response.json();
@@ -214,6 +248,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             } catch (error) {
                 console.error("Erro ao buscar histórico de vendas da API:", error);
                 toast.error('Não foi possível carregar o histórico de vendas.');
+                if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
                 setSalesHistory([]); // Limpa em caso de erro
             }
         };
@@ -248,13 +283,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     useEffect(() => {
         const fetchClients = async () => {
             try {
-                const token = localStorage.getItem('boycell-token');
-                if (!token) {
-                    setClientes([]); // Limpa clientes se não houver token
-                    return;
-                }
-                const response = await fetch(`${API_URL}/api/clients`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                const response = await makeAuthRequest(`${API_URL}/api/clients`, {
+                    method: 'GET',
+                    // Headers are added by makeAuthRequest
                 });
                 if (!response.ok) throw new Error('Falha ao buscar clientes.');
                 if (!response.ok) {
@@ -264,6 +295,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 const data = await response.json();
                 setClientes(data);
             } catch (error) {
+                if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
                 console.error("Erro ao buscar clientes da API:", error);
                 console.log('Info: Não foi possível carregar os clientes. Isso pode ocorrer se não houver clientes cadastrados ou por um erro de conexão.');
                 setClientes([]); // Limpa em caso de erro
@@ -285,15 +317,14 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     useEffect(() => {
         const fetchUsers = async (token) => {
             try {
-                const response = await fetch(`${API_URL}/api/users`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await makeAuthRequest(`${API_URL}/api/users`, { method: 'GET' });
                 if (!response.ok) throw new Error('Falha ao buscar usuários.');
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
                 console.error("Erro ao buscar usuários da API:", error);
                 toast.error('Não foi possível carregar os usuários.');
+                if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
             }
         };
 
@@ -317,10 +348,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         const fetchBanners = async () => {
             if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'root')) {
                 try {
-                    const token = localStorage.getItem('boycell-token');
-                    const response = await fetch(`${API_URL}/api/banners/all`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const response = await makeAuthRequest(`${API_URL}/api/banners/all`, { method: 'GET' });
                     if (!response.ok) throw new Error('Falha ao buscar banners.');
                     const data = await response.json();
                     setBanners(data);
@@ -532,13 +560,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         setIsSubmitting(true);
 
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/products`, {
+            const response = await makeAuthRequest(`${API_URL}/api/products`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify({
                     ...newProduct,
                     emEstoque: parseInt(newProduct.emEstoque, 10),
@@ -558,6 +582,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             toast.success('Produto adicionado com sucesso!');
             handleCloseAddModal();
         } catch (error) {
+            if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
             toast.error(error.message);
         } finally {
             setIsSubmitting(false);
@@ -605,10 +630,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         };
     
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/products/${editingProduct.id}`, {
+            const response = await makeAuthRequest(`${API_URL}/api/products/${editingProduct.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify(productToUpdate)
             });
     
@@ -629,10 +653,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         if (window.confirm('Tem certeza que deseja excluir este produto?')) {
             try {
-                const token = localStorage.getItem('boycell-token');
-                const response = await fetch(`${API_URL}/api/products/${idProduto}`, {
+                const response = await makeAuthRequest(`${API_URL}/api/products/${idProduto}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // Headers are added by makeAuthRequest
                 });
     
                 const data = await response.json();
@@ -848,10 +871,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         };
     
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/services/${editingServico.id}`, {
+            const response = await makeAuthRequest(`${API_URL}/api/services/${editingServico.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify(serviceToUpdate)
             });
     
@@ -1052,13 +1074,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleSale = async (saleDetails) => {
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/sales`, {
+            const response = await makeAuthRequest(`${API_URL}/api/sales`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify(saleDetails)
             });
     
@@ -1098,6 +1116,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     
             return data; // Return the complete sale object from the backend
         } catch (error) {
+            if (error.message === 'Unauthorized access: Token invalid or expired.') return null; // Already handled by makeAuthRequest
             toast.error(error.message);
             return null;
         }
@@ -1105,12 +1124,6 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleAddUser = async (newUser, adminName) => {
         try {
-            const token = localStorage.getItem('boycell-token');
-            if (!token) {
-                toast.error('Não autorizado. Faça login novamente.');
-                return false;
-            }
-
             // Define as permissões padrão para um novo usuário (vendedor)
             const userPermissions = {
                 ...newUser,
@@ -1119,10 +1132,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
             const response = await fetch(`${API_URL}/api/users/register`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify(userPermissions)
         }); 
 
