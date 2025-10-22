@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, X, Edit, LogOut, ShoppingCart, Mail, Printer, Send, Banknote, CreditCard, QrCode, DollarSign, ShoppingBag, Calendar, Eye, EyeOff, Sun, Moon } from 'lucide-react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { Search, X, Edit, LogOut, ShoppingCart, Printer, Send, Banknote, CreditCard, QrCode, DollarSign, ShoppingBag, Calendar, Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import ReciboVenda from './ReciboVenda';
 import Modal from './Modal';
@@ -94,7 +94,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
         const inicioDoMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
         const vendasConsideradas = (currentUser?.role === 'admin' || currentUser?.role === 'root')
-            ? salesHistory
+            ? salesHistory 
             : salesHistory.filter(sale => sale.vendedor === currentUser?.name);
 
         const vendasHoje = vendasConsideradas.filter(sale => new Date(sale.date) >= inicioDoDia);
@@ -409,7 +409,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
                     <div id="dashboard-vendedor">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Seu Desempenho</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <DashboardCard
+                            <DashboardCard 
                                 icon={DollarSign}
                                 title="Total Vendido Hoje"
                                 value={showVendidoHoje ? (vendedorDashboardData?.totalVendidoHoje || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ ####,##'}
@@ -418,7 +418,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
                                 showValue={showVendidoHoje}
                                 onToggle={() => setShowVendidoHoje(prev => !prev)}
                             />
-                            <DashboardCard
+                            <DashboardCard 
                                 icon={ShoppingBag}
                                 title="Vendas Realizadas Hoje"
                                 value={showVendasHoje ? vendedorDashboardData?.vendasHoje || 0 : '##'}
@@ -427,7 +427,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
                                 showValue={showVendasHoje}
                                 onToggle={() => setShowVendasHoje(prev => !prev)}
                             />
-                            <DashboardCard
+                            <DashboardCard 
                                 icon={Calendar}
                                 title="Total Vendido no Mês"
                                 value={showVendidoMes ? (vendedorDashboardData?.totalVendidoMes || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ ####,##'}
