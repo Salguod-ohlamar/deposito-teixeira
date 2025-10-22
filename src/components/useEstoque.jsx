@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
+import { toast } from 'react-hot-toast';
 
 import { parsePrice } from './formatters.js';
 
