@@ -716,7 +716,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
                         <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Gerenciamento</h3>
                         <div className="flex flex-col gap-3">
-                            {currentUser?.permissions?.manageUsers && (
+                            {currentUser?.permissions?.manageUsers && ( // Apenas quem pode gerenciar usuários pode ver estes botões
                                 <>
                                     <button onClick={handleOpenAddUserModal} className={actionButtonClasses}>
                                         <PlusCircle size={18} /> Adicionar Usuário

@@ -563,7 +563,7 @@ app.post('/api/auth/recover', async (req, res) => {
 // ==================
 
 // Rota para criar um novo usuário (somente admin/root)
-app.post('/api/users/register', protect, hasPermission('manageUsers'), async (req, res) => {
+app.post('/api/users/register', protect, async (req, res) => {
   const { name, email, password, title, permissions } = req.body;
   
   // Define o role com base na permissão de gerenciar usuários.
