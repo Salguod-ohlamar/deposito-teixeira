@@ -26,10 +26,10 @@ const AppContent = () => {
         setCurrentUser(user);
         setIsLoginModalOpen(false);
         // Admin/root goes to stock control, vendedor goes to sales page
-        if (['admin', 'root'].includes(user.role)) {
+        if (user.role === 'root' || user.permissions?.editProduct || user.permissions?.manageUsers) {
             navigate('/estoque');
         } else {
-            navigate('/vendas'); // Fallback para outros papéis futuros
+            navigate('/vendas');
         }
     };
 
@@ -64,10 +64,18 @@ const AppContent = () => {
                                 />
                             } />
 
-                            {/* Rotas para Estoque, Clientes, Admin: Acessíveis por admin e root. */}
-                            <Route element={<ProtectedRoute user={currentUser} allowedRoles={['admin', 'root']} redirectPath="/vendas" />}>
+                            {/* Rotas para Estoque, Clientes, Admin: Acessíveis por permissão */}
+                            <Route element={
+                                <ProtectedRoute 
+                                    user={currentUser} 
+                                    requiredPermission={[
+                                        ...Object.keys(PERMISSION_GROUPS.products.permissions),
+                                        ...Object.keys(PERMISSION_GROUPS.services.permissions),
+                                        ...Object.keys(PERMISSION_GROUPS.admin.permissions),
+                                        ...Object.keys(PERMISSION_GROUPS.root.permissions),
+                                    ]} 
+                                    redirectPath="/vendas" />}>
                                 <Route path="/estoque" element={<StockControl onLogout={handleLogout} currentUser={currentUser} />} />
-                                <Route path="/clientes" element={<ClientesPage onLogout={handleLogout} currentUser={currentUser} />} />
                                 <Route path="/admin" element={<AdminPage onLogout={handleLogout} currentUser={currentUser} />} />
                             </Route>
                         </Route>

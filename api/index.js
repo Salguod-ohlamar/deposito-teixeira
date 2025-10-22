@@ -508,17 +508,11 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Credenciais inválidas.' });
     }
 
-    // Garante que o usuário tenha as permissões mais recentes para sua role
-    const defaultPerms = getDefaultPermissions(user.role);
-    const finalPermissions = { ...defaultPerms, ...(user.permissions || {}) };
+    let finalPermissions = user.permissions || {};
 
     // Garante que o root sempre tenha todas as permissões
     if (user.role === 'root') {
-        for (const group in PERMISSION_GROUPS) {
-            for (const perm in PERMISSION_GROUPS[group].permissions) {
-                finalPermissions[perm] = true;
-            }
-        }
+        finalPermissions = getDefaultPermissions('root');
     }
 
     // Create JWT
@@ -570,15 +564,11 @@ app.post('/api/auth/recover', async (req, res) => {
 
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, hasPermission('manageUsers'), async (req, res) => {
-  const { name, email, password, title, permissions, role } = req.body;
-  const requestingUser = req.user;
-
-  // Apenas o root pode definir o cargo. Se não for o root, o cargo é 'user' por padrão.
-  // As permissões são sempre customizadas a partir do frontend.
-  const finalRole = (requestingUser.role === 'root' && role) ? role : 'user';
+  const { name, email, password, title, permissions } = req.body;
+  const finalRole = 'user'; // Todos os novos usuários são 'user'. O que importa são as permissões.
 
   // Validação dos campos
-  if (!name || !email || !password || !title || !permissions || !finalRole) {
+  if (!name || !email || !password || !title) {
     return res.status(400).json({ message: 'Nome, email, senha e título do cargo são obrigatórios.' });
   }
 
@@ -594,7 +584,7 @@ app.post('/api/users/register', protect, hasPermission('manageUsers'), async (re
 
     const { rows } = await db.query(
       'INSERT INTO users (name, email, password_hash, role, permissions, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, permissions, title',
-      [name, email.toLowerCase(), password_hash, finalRole, JSON.stringify(permissions), title]
+      [name, email.toLowerCase(), password_hash, finalRole, JSON.stringify(permissions || {}), title]
     );
 
     res.status(201).json(rows[0]);
@@ -672,12 +662,6 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
         const targetUser = targetUserRows[0];
         if (targetUser.role === 'root') return res.status(403).json({ message: 'O usuário root não pode ser editado.' });
         
-        // Um usuário 'user' não pode editar outro 'user'. Apenas o 'root' pode.
-        // Apenas o root pode editar um admin.
-        if (targetUser.role === 'admin' && requestingUser.role !== 'root') {
-            return res.status(403).json({ message: 'Apenas o usuário root pode editar um administrador.' });
-        }
-
         // Check for email collision
         if (email) {
             const { rows: existingEmail } = await db.query('SELECT id FROM users WHERE lower(email) = $1 AND id != $2', [email.toLowerCase(), id]);
@@ -691,17 +675,13 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
         if (name) { updateFields.push(`name = $${valueCount++}`); values.push(name); }
         if (email) { updateFields.push(`email = $${valueCount++}`); values.push(email.toLowerCase()); }
         if (title) { updateFields.push(`title = $${valueCount++}`); values.push(title); }
-        if (role && role === 'admin' && requestingUser.role === 'root') {
-            updateFields.push(`role = $${valueCount++}`);
-            values.push(role);
-        }
         if (password) {
             const salt = await bcrypt.genSalt(10);
             const password_hash = await bcrypt.hash(password, salt);
             updateFields.push(`password_hash = $${valueCount++}`);
             values.push(password_hash);
         }
-        // Root pode editar permissões de qualquer um. Admin pode editar permissões de vendedor.
+        // Apenas o root pode editar permissões.
         if (permissions && requestingUser.role === 'root') {
             updateFields.push(`permissions = $${valueCount++}`);
             values.push(JSON.stringify(permissions));
@@ -732,7 +712,6 @@ app.delete('/api/users/:id', protect, hasPermission('manageUsers'), async (req, 
         
         const targetUser = targetUserRows[0];
         if (targetUser.role === 'root') return res.status(403).json({ message: 'O usuário root não pode ser excluído.' });
-        if (targetUser.role === 'admin' && requestingUser.role !== 'root') return res.status(403).json({ message: 'Apenas o usuário root pode excluir um administrador.' });
 
         await db.query('DELETE FROM users WHERE id = $1', [id]);
         res.status(200).json({ message: `Usuário "${targetUser.name}" excluído com sucesso.` });

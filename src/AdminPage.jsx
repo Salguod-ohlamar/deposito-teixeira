@@ -91,7 +91,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const [isDreModalOpen, setIsDreModalOpen] = useState(false);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const [isChartsModalOpen, setIsChartsModalOpen] = useState(false);
-    const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor', role: 'user', permissions: getDefaultPermissions('user') });
+    const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor', permissions: {} });
     const [editingUser, setEditingUser] = useState(null);
     const [reprintingSale, setReprintingSale] = useState(null);
     const [monthlySalesReport, setMonthlySalesReport] = useState(null);
@@ -188,7 +188,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const handleOpenAddUserModal = () => setIsAddUserModalOpen(true);
     const handleCloseAddUserModal = () => {
         setIsAddUserModalOpen(false);
-        setNewUserData({ name: '', email: '', password: '', title: 'Vendedor', role: 'user', permissions: getDefaultPermissions('user') });
+        setNewUserData({ name: '', email: '', password: '', title: 'Vendedor', permissions: {} });
     };
     const handleNewUserChange = (e) => {
         const { name, value } = e.target;
@@ -196,7 +196,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     };
     const handleAddNewUser = async (e) => {
         e.preventDefault();
-        if (!newUserData.name || !newUserData.email || !newUserData.password || !newUserData.title || !newUserData.role) {
+        if (!newUserData.name || !newUserData.email || !newUserData.password || !newUserData.title) {
             toast.error('Por favor, preencha todos os campos: Nome, Email, Senha e Título.');
             return;
         }
@@ -215,13 +215,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     };
     const handleEditUserChange = (e) => {
         const { name, value } = e.target;
-        setEditingUser(prev => {
-            const newState = { ...prev, [name]: value };
-            if (name === 'role') {
-                newState.permissions = getDefaultPermissions(value);
-            }
-            return newState;
-        });
+        setEditingUser(prev => ({ ...prev, [name]: value }));
     };
     const handleUpdateUserSubmit = async (e) => {
         e.preventDefault();
@@ -804,15 +798,15 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                     <div className="flex items-center gap-2">
                                         <span className={`px-2 py-1 text-xs font-bold rounded-full ${userRoleClass}`}>{user.title || user.role}</span>
                                         {showManagementButtons && (<>
-                                            {currentUser.permissions?.resetUserPassword && user.role === 'vendedor' && (
+                                            {currentUser.permissions?.resetUserPassword && (
                                             <button onClick={() => handleResetUserPassword(user.id, currentUser.name, currentUser)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title="Resetar Senha">
                                                     <KeyRound size={18} />
                                                 </button>
                                             )}
-                                        <button onClick={() => handleOpenEditUserModal(user)} className="text-blue-400 hover:text-blue-300 transition-colors" title={`Editar ${user.role === 'admin' ? 'Administrador' : 'Vendedor'}`}>
+                                        <button onClick={() => handleOpenEditUserModal(user)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar Usuário">
                                                 <Edit size={18} />
                                             </button>
-                                        <button onClick={async () => await handleDeleteUser(user.id, currentUser.name, currentUser)} className="text-red-400 hover:text-red-300 transition-colors" title={`Excluir ${user.role === 'admin' ? 'Administrador' : 'Vendedor'}`}><Trash2 size={18} /></button>
+                                        <button onClick={async () => await handleDeleteUser(user.id, currentUser.name, currentUser)} className="text-red-400 hover:text-red-300 transition-colors" title="Excluir Usuário"><Trash2 size={18} /></button>
                                         </>)}
                                     </div>
                                 </div>
@@ -918,15 +912,39 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             placeholder="Ex: Vendedor, Gerente" />
                     </div>
-                {currentUser.role === 'root' && (
-                    <div>
-                        <label htmlFor="user-role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Cargo (Permissões)</label>
-                        <select id="user-role" name="role" value={newUserData.role} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option value="user">Vendedor</option>
-                            <option value="admin">Administrador</option>
-                        </select>
+                    {/* Seção de Permissões para Adicionar Usuário */}
+                    <div className="mt-4 md:col-span-2">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Permissões</h4>
+                        <div className="space-y-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg max-h-80 overflow-y-auto">
+                            {Object.values(PERMISSION_GROUPS).map((group, groupIndex) => (
+                                <div key={group.title}>
+                                    <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{group.title}</h5>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                                        {Object.entries(group.permissions).map(([key, { label }]) => (
+                                            <label key={key} className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={!!newUserData.permissions?.[key]}
+                                                    onChange={(e) => {
+                                                        const { checked } = e.target;
+                                                        setNewUserData(prev => ({
+                                                            ...prev,
+                                                            permissions: { ...(prev.permissions || {}), [key]: checked }
+                                                        }));
+                                                    }}
+                                                    className="form-checkbox h-4 w-4 text-purple-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-purple-500"
+                                                />
+                                                <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {groupIndex < Object.values(PERMISSION_GROUPS).length - 1 && (
+                                        <hr className="border-gray-300 dark:border-gray-700 mt-4" />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                )}
                     <button type="submit" className="w-full mt-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
                         Adicionar Usuário
                     </button>
