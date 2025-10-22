@@ -171,10 +171,10 @@ const HomePage = ({ onLoginClick }) => {
 
     return (
         <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
-            <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+            <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
                 {/* <TopBar /> */}
                 <div className="container mx-auto flex items-center justify-between p-4 gap-4">
-                    <div className="text-xl lg:text-2xl font-bold tracking-wider text-gray-900 dark:text-white whitespace-nowrap"><a href="/">Teixeira Depósito de Materiais</a></div>
+                    <div className="text-xl lg:text-2xl font-bold tracking-wider text-white whitespace-nowrap"><a href="/">Teixeira Depósito de Materiais</a></div>
                     
                     <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-xl">
                         <input 
@@ -184,12 +184,12 @@ const HomePage = ({ onLoginClick }) => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <Button type="submit" variant="secondary" className="rounded-l-none !rounded-r-md border-gray-300 dark:border-gray-700"><Search size={20} className="text-gray-600 dark:text-gray-400" /></Button>
+                        <Button type="submit" variant="secondary" className="rounded-l-none !rounded-r-md border-gray-300 dark:border-gray-700 bg-white/80 hover:bg-white"><Search size={20} className="text-gray-600" /></Button>
                     </form>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
-                        <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex">
-                            <User size={24} />
+                        <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex text-white hover:bg-white/20">
+                            <User size={24} className="text-white" />
                         </Button>
                         <div className="lg:hidden">
                             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu"><Menu size={24} /></Button>
