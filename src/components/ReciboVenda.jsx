@@ -8,7 +8,7 @@ const ReciboVenda = ({ saleDetails }) => {
     return (
         <div className="p-8 bg-white text-black font-mono text-xs">
             <div className="text-center mb-6">
-                <h1 className="text-xl font-bold">Boycell</h1>
+                <h1 className="text-xl font-bold">Deposito Teixeira</h1>
                 <p className="text-sm">Comprovante de Venda</p>
                 {receiptCode && <p className="text-xs font-semibold">Cód: {receiptCode}</p>}
                 <p className="text-xs italic">Este documento não é fiscal.</p>

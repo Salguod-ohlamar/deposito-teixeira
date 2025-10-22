@@ -4,9 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import ReciboVenda from './ReciboVenda';
 import Modal from './Modal.jsx';
-import { validateCPF, validatePhone } from './formatters.js';
 import { useEstoqueContext, PERMISSION_GROUPS } from './components/useEstoque.jsx';
-import { PERMISSION_GROUPS } from './components/useEstoque.jsx';
 import { useTheme } from './ThemeContext.jsx';
 const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue, onToggle }) => {
     const Icon = icon;

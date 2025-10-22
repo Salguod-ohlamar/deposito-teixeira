@@ -85,7 +85,7 @@ const RelatorioVendasMensal = ({ reportData }) => {
             </div>
              <div className="text-center mt-12 text-xs">
                 <p>Relatório gerado em: {new Date().toLocaleString('pt-BR')}</p>
-                <p>Relatorio gerado por GestorCell</p>
+                <p>Relatório gerado por Deposito Teixeira</p>
             </div>
         </div>
     );

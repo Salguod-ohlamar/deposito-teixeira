@@ -429,8 +429,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         setEditingProduct(null);
     };
 
-    // Form input handlers
-    const handleInputChange = (e) => {
+    // Generic form input handler for both new and editing items
+    const handleItemChange = (e, stateSetter) => {
         const { name, value, type, checked, files } = e.target;
 
         if (type === 'file' && files && files[0]) {
@@ -441,7 +441,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                     const compressedFile = await imageCompression(file, options);
                     const reader = new FileReader();
                     reader.onloadend = () => {
-                        setNewProduct(prevState => ({ ...prevState, imagem: reader.result }));
+                        stateSetter(prevState => ({ ...prevState, imagem: reader.result }));
                     };
                     reader.readAsDataURL(compressedFile);
                 } catch (error) {
@@ -453,98 +453,31 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             return;
         }
 
-        setNewProduct(prevState => {
+        stateSetter(prevState => {
             const isCheckbox = type === 'checkbox';
             const updatedValue = isCheckbox ? checked : value;
             
             const newState = { ...prevState, [name]: updatedValue };
             
-            // If final price is edited manually, clear markup.
             if (name === 'precoFinal') {
                 newState.markup = '';
             }
 
-            // If a dependency of precoFinal changes, recalculate it.
-            if (['preco', 'markup', 'incluirIcms'].includes(name)) {
+            if (['preco', 'markup'].includes(name)) {
                 const preco = parseFloat(newState.preco);
                 const markup = parseFloat(newState.markup);
 
-                // Only calculate if we have a valid markup.
                 if (!isNaN(preco) && !isNaN(markup) && markup >= 0) {
                     let precoFinal = preco * (1 + markup / 100);
-                    if (newState.incluirIcms) {
-                        precoFinal *= 1.18;
-                    }
                     newState.precoFinal = Math.round(precoFinal * 100) / 100;
-                } else if (name === 'incluirIcms') {
-                    // If checkbox is toggled but there's no markup, adjust the existing precoFinal.
-                    const precoFinalValue = parseFloat(newState.precoFinal);
-                    if (!isNaN(precoFinalValue)) {
-                        newState.precoFinal = Math.round((checked ? precoFinalValue * 1.18 : precoFinalValue / 1.18) * 100) / 100;
-                    }
                 }
             }
             return newState;
         });
     };
 
-    const handleEditInputChange = (e) => {
-        const { name, value, type, checked, files } = e.target;
-
-        if (type === 'file' && files && files[0]) {
-            const file = files[0];
-            const compressAndSetImage = async () => {
-                const options = { maxSizeMB: 1, maxWidthOrHeight: 1024, useWebWorker: true };
-                try {
-                    const compressedFile = await imageCompression(file, options);
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        setEditingProduct(prevState => ({ ...prevState, imagem: reader.result }));
-                    };
-                    reader.readAsDataURL(compressedFile);
-                } catch (error) {
-                    console.error('Erro ao comprimir imagem:', error);
-                    toast.error('Falha ao processar a imagem. Tente uma imagem menor ou de outro formato.');
-                }
-            };
-            compressAndSetImage();
-            return;
-        }
-
-        setEditingProduct(prevState => {
-            const isCheckbox = type === 'checkbox';
-            const updatedValue = isCheckbox ? checked : value;
-
-            const newState = { ...prevState, [name]: updatedValue };
-            
-            // If final price is edited manually, clear markup.
-            if (name === 'precoFinal') {
-                newState.markup = '';
-            }
-
-            // If a dependency of precoFinal changes, recalculate it.
-            if (['preco', 'markup', 'incluirIcms'].includes(name)) {
-                const preco = parseFloat(newState.preco);
-                const markup = parseFloat(newState.markup);
-
-                // Only calculate if we have a valid markup.
-                if (!isNaN(preco) && !isNaN(markup) && markup >= 0) {
-                    let precoFinal = preco * (1 + markup / 100);
-                    if (newState.incluirIcms) {
-                        precoFinal *= 1.18;
-                    }
-                    newState.precoFinal = Math.round(precoFinal * 100) / 100;
-                } else if (name === 'incluirIcms') {
-                    // If checkbox is toggled but there's no markup, adjust the existing precoFinal.
-                    const precoFinalValue = parseFloat(newState.precoFinal);
-                    if (!isNaN(precoFinalValue)) {
-                        newState.precoFinal = Math.round((checked ? precoFinalValue * 1.18 : precoFinalValue / 1.18) * 100) / 100;
-                    }
-                }
-            }
-            return newState;
-        });
-    };
+    const handleInputChange = (e) => handleItemChange(e, setNewProduct);
+    const handleEditInputChange = (e) => handleItemChange(e, setEditingProduct);
 
     // ===================================================================
     // PRODUCT CRUD
@@ -746,53 +679,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         setEditingServico(null);
     };
 
-    const handleServicoInputChange = (e) => {
-        const { name, value, type, files, checked } = e.target;
-        const stateSetter = isEditServicoModalOpen ? setEditingServico : setNewServico;
-    
-        if (type === 'file' && files && files[0]) {
-            const file = files[0];
-            const compressAndSetImage = async () => {
-                const options = { maxSizeMB: 1, maxWidthOrHeight: 1024, useWebWorker: true };
-                try {
-                    const compressedFile = await imageCompression(file, options);
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        stateSetter(prevState => ({ ...prevState, imagem: reader.result }));
-                    };
-                    reader.readAsDataURL(compressedFile);
-                } catch (error) {
-                    console.error('Erro ao comprimir imagem:', error);
-                    toast.error('Falha ao processar a imagem. Tente uma imagem menor ou de outro formato.');
-                }
-            };
-            compressAndSetImage();
-            return;
-        }
-    
-        stateSetter(prevState => {
-            const isCheckbox = type === 'checkbox';
-            const updatedValue = isCheckbox ? checked : value;
-            
-            const newState = { ...prevState, [name]: updatedValue };
-    
-            // If final price is edited manually, clear markup.
-            if (name === 'precoFinal') {
-                newState.markup = '';
-            }
-
-            // If a dependency of precoFinal changes, recalculate it.
-            if (['preco', 'markup'].includes(name)) {
-                const preco = parseFloat(newState.preco);
-                const markup = parseFloat(newState.markup);
-
-                if (!isNaN(preco) && !isNaN(markup) && markup >= 0) {
-                    newState.precoFinal = Math.round((preco * (1 + markup / 100)) * 100) / 100;
-                }
-            }
-            return newState;
-        });
-    };
+    const handleServicoInputChange = (e) => handleItemChange(e, isEditServicoModalOpen ? setEditingServico : setNewServico);
 
     // ===================================================================
     // SERVICE CRUD HANDLERS
@@ -805,13 +692,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         }
     
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/services`, {
+            const response = await makeAuthRequest(`${API_URL}/api/services`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                // Headers are added by makeAuthRequest
                 body: JSON.stringify({
                     ...newServico,
                     preco: parseFloat(newServico.preco),
@@ -894,10 +777,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         if (window.confirm('Tem certeza que deseja excluir este serviço?')) {
             try {
-                const token = localStorage.getItem('boycell-token');
-                const response = await fetch(`${API_URL}/api/services/${id}`, {
+                const response = await makeAuthRequest(`${API_URL}/api/services/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    // Headers are added by makeAuthRequest
                 });
     
                 const data = await response.json();
@@ -1130,13 +1012,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 permissions: getDefaultPermissions('user')
             };
 
-            const response = await fetch(`${API_URL}/api/users/register`, {
+            const response = await makeAuthRequest(`${API_URL}/api/users/register`, {
                 method: 'POST',
-                // Headers are added by makeAuthRequest
                 body: JSON.stringify(userPermissions)
-        }); 
-
-            const data = await response.json();
+            });
 
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao criar usuário.');
@@ -1168,10 +1047,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         if (window.confirm(`Tem certeza que deseja excluir o usuário "${userToDelete.name}"?`)) {
             try {
-                const token = localStorage.getItem('boycell-token');
-                const response = await fetch(`${API_URL}/api/users/${userId}`, {
+                const response = await makeAuthRequest(`${API_URL}/api/users/${userId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const data = await response.json();
@@ -1188,18 +1065,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleUpdateUser = async (userId, updatedData, adminName, currentUser) => {
         try {
-            const token = localStorage.getItem('boycell-token');
             // Prepara o corpo da requisição
             const body = { ...updatedData };
             if (!body.password) delete body.password;
             
             // A API irá validar se o usuário tem permissão para alterar o role.
-            const response = await fetch(`${API_URL}/api/users/${userId}`, { 
+            const response = await makeAuthRequest(`${API_URL}/api/users/${userId}`, { 
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(body)
             });
 
@@ -1235,13 +1107,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleUpdateCliente = async (clienteId, updatedData, adminName) => {
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/clients/${clienteId}`, {
+            const response = await makeAuthRequest(`${API_URL}/api/clients/${clienteId}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
                 body: JSON.stringify(updatedData)
             });
 
@@ -1267,10 +1134,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         if (window.confirm('vc perdera os dados do cliente e todo o historico pertencente a ele, será irrecuperavel!!! tem certeza?')) {
             try {
-                const token = localStorage.getItem('boycell-token');
-                const response = await fetch(`${API_URL}/api/clients/${clienteId}`, {
+                const response = await makeAuthRequest(`${API_URL}/api/clients/${clienteId}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const data = await response.json();
@@ -1364,10 +1229,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         if (window.confirm(`Tem certeza que deseja resetar a senha de "${userToReset.name}"? Uma nova senha será gerada.`)) {
             try {
-                const token = localStorage.getItem('boycell-token');
-                const response = await fetch(`${API_URL}/api/users/${userId}/reset-password`, {
+                const response = await makeAuthRequest(`${API_URL}/api/users/${userId}/reset-password`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 const data = await response.json();
@@ -1405,10 +1268,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleAddBanner = async (newBannerData, adminName) => {
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/banners`, {
+            const response = await makeAuthRequest(`${API_URL}/api/banners`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(newBannerData)
             });
             const data = await response.json();
@@ -1425,10 +1286,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     const handleUpdateBanner = async (bannerId, bannerData, adminName) => {
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/banners/${bannerId}`, {
+            const response = await makeAuthRequest(`${API_URL}/api/banners/${bannerId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(bannerData)
             });
             const data = await response.json();
@@ -1446,10 +1305,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const handleDeleteBanner = async (bannerId, adminName) => {
         if (!window.confirm('Tem certeza que deseja excluir este banner?')) return;
         try {
-            const token = localStorage.getItem('boycell-token');
-            const response = await fetch(`${API_URL}/api/banners/${bannerId}`, {
+            const response = await makeAuthRequest(`${API_URL}/api/banners/${bannerId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Erro ao excluir banner.');

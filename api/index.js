@@ -150,7 +150,7 @@ app.put('/api/services/:id', protect, hasPermission('editService'), async (req, 
         servico, fornecedor, marca, tipoReparo, tecnico, is_offer,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
-    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup);
+    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup); // Garante que markup inválido vire null
 
     try {
         const query = `
@@ -418,7 +418,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
         nome, categoria, marca, fornecedor, emEstoque, em_estoque, qtdaMinima, is_offer,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
-    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(parseFloat(markup));
+    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup); // Garante que markup inválido vire null
 
     try {
         const query = `
@@ -430,10 +430,10 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), // $1 - $6
-            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, // $7 - $12
-            JSON.stringify(historico), !!is_offer, // $13, $14
-            id // $15
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            JSON.stringify(historico), !!is_offer,
+            id
         ];
 
         const { rows } = await db.query(query, values);
@@ -572,11 +572,13 @@ app.post('/api/auth/recover', async (req, res) => {
 
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, async (req, res) => {
-  const { name, email, password, title, permissions } = req.body;
-  
-  // Define o role com base na permissão de gerenciar usuários.
-  const finalRole = permissions?.manageUsers ? 'admin' : 'user';
+    const { name, email, password, title, permissions } = req.body;
+    const requestingUser = req.user;
 
+    // Apenas root ou admin podem criar usuários.
+    if (requestingUser.role !== 'root' && requestingUser.role !== 'admin') {
+        return res.status(403).json({ message: 'Acesso negado.' });
+    }
   // Validação dos campos
   if (!name || !email || !password || !title) {
     return res.status(400).json({ message: 'Nome, email, senha e título do cargo são obrigatórios.' });
@@ -593,8 +595,10 @@ app.post('/api/users/register', protect, async (req, res) => {
     const password_hash = await bcrypt.hash(password, salt);
 
     const { rows } = await db.query(
+      // Novos usuários são sempre criados com o role 'user' e permissões padrão.
+      // A promoção para 'admin' deve ser feita pelo 'root' editando o usuário.
       'INSERT INTO users (name, email, password_hash, role, permissions, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, permissions, title',
-      [name, email.toLowerCase(), password_hash, finalRole, JSON.stringify(permissions || {}), title]
+      [name, email.toLowerCase(), password_hash, 'user', JSON.stringify(permissions || getDefaultPermissions('user')), title]
     );
 
     res.status(201).json(rows[0]);

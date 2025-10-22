@@ -41,7 +41,7 @@ const DreReport = ({ reportData }) => {
             <div className="text-center mt-10 text-xs text-gray-500">
                 <p><strong>Nota:</strong> Este é um relatório simplificado e não inclui despesas operacionais como aluguel, salários, etc.</p>
                 <p>Relatório gerado em: {new Date().toLocaleString('pt-BR')}</p>
-                <p>Relatorio gerado por GestorCell</p>
+                <p>Relatório gerado por Deposito Teixeira</p>
             </div>
         </div>
     );
