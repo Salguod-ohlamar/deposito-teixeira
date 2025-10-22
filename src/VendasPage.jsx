@@ -711,7 +711,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
                     <>
                         <h2 className="text-2xl font-bold text-center text-blue-400 mb-4">Venda Concluída</h2>
                         <div className="bg-white rounded-lg overflow-y-auto max-h-[60vh]">
-                            <ReciboVenda saleDetails={lastSaleDetails} />
+                            <ReciboVenda sale={lastSaleDetails} />
                         </div>
                         <div className="mt-6 flex flex-col sm:flex-row justify-end gap-4">
                             <button onClick={handleWhatsAppRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-full transition-colors">
