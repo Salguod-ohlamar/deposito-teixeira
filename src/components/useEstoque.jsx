@@ -1118,14 +1118,14 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(newUser)
-            });
+        }); 
 
             const data = await response.json();
 
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao criar usuário.');
             }
-
+ 
             setUsers(prevUsers => [...prevUsers, data]);
             logAdminActivity(adminName, 'Criação de Usuário', `Vendedor "${data.name}" (${data.email}) foi criado.`);
             toast.success('Vendedor adicionado com sucesso!');
@@ -1173,11 +1173,12 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const handleUpdateUser = async (userId, updatedData, adminName, currentUser) => {
         try {
             const token = localStorage.getItem('boycell-token');
-            // Remove password from body if it's empty
+            // Prepara o corpo da requisição
             const body = { ...updatedData };
             if (!body.password) delete body.password;
-
-            const response = await fetch(`${API_URL}/api/users/${userId}`, {
+            
+            // A API irá validar se o usuário tem permissão para alterar o role.
+            const response = await fetch(`${API_URL}/api/users/${userId}`, { 
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1189,7 +1190,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Erro ao atualizar usuário.');
 
-            setUsers(currentUsers => currentUsers.map(user => (user.id === userId ? data : user)));
+            setUsers(currentUsers => currentUsers.map(user => (user.id === userId ? { ...user, ...data } : user)));
             
             // Se o usuário que está sendo editado é o próprio usuário logado, atualiza o currentUser
             if (currentUser && currentUser.id === userId) {

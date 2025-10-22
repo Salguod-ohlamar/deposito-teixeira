@@ -565,7 +565,9 @@ app.post('/api/auth/recover', async (req, res) => {
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, hasPermission('manageUsers'), async (req, res) => {
   const { name, email, password, title, permissions } = req.body;
-  const finalRole = 'user'; // Todos os novos usuários são 'user'. O que importa são as permissões.
+  
+  // Define o role com base na permissão de gerenciar usuários.
+  const finalRole = permissions?.manageUsers ? 'admin' : 'user';
 
   // Validação dos campos
   if (!name || !email || !password || !title) {
@@ -661,6 +663,10 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
         
         const targetUser = targetUserRows[0];
         if (targetUser.role === 'root') return res.status(403).json({ message: 'O usuário root não pode ser editado.' });
+        // Um admin não pode editar outro admin, apenas o root pode.
+        if (targetUser.role === 'admin' && requestingUser.role !== 'root') {
+            return res.status(403).json({ message: 'Apenas o superusuário (root) pode editar outros administradores.' });
+        }
         
         // Check for email collision
         if (email) {
@@ -675,6 +681,11 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
         if (name) { updateFields.push(`name = $${valueCount++}`); values.push(name); }
         if (email) { updateFields.push(`email = $${valueCount++}`); values.push(email.toLowerCase()); }
         if (title) { updateFields.push(`title = $${valueCount++}`); values.push(title); }
+        
+        // Apenas o root pode alterar o cargo de um usuário.
+        if (role && requestingUser.role === 'root' && ['user', 'admin'].includes(role)) {
+            updateFields.push(`role = $${valueCount++}`); values.push(role);
+        }
         if (password) {
             const salt = await bcrypt.genSalt(10);
             const password_hash = await bcrypt.hash(password, salt);
@@ -682,7 +693,7 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
             values.push(password_hash);
         }
         // Apenas o root pode editar permissões.
-        if (permissions && requestingUser.role === 'root') {
+        if (permissions && requestingUser.role === 'root') { 
             updateFields.push(`permissions = $${valueCount++}`);
             values.push(JSON.stringify(permissions));
         }

@@ -793,8 +793,8 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             const userRoleClass = user.role === 'root' ? 'bg-red-500 text-white' : (user.role === 'admin' ? 'bg-green-500 text-black' : 'bg-blue-500 text-white');
                             return (
                                 <div key={user.id} className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-                                    <div>
-                                        <p className="font-semibold text-white">{user.name} <span className="text-xs text-gray-400">({user.title || user.role})</span></p>
+                                    <div className="flex-grow">
+                                        <p className="font-semibold text-gray-900 dark:text-white">{user.name} <span className="text-sm font-normal text-gray-500 dark:text-gray-400">({user.title || user.role})</span></p>
                                         <p className="text-sm text-gray-400">{user.email}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -834,7 +834,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             <label htmlFor="edit-user-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nova Senha (Opcional)</label>
                             <input id="edit-user-password" name="password" type="password" value={editingUser.password} onChange={handleEditUserChange} placeholder="Deixe em branco para não alterar" className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
-                        {currentUser.role === 'root' && editingUser.role !== 'root' && (
+                        {currentUser.role === 'root' && (
                             <div>
                                 <label htmlFor="edit-user-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Título do Cargo</label>
                                 <input
@@ -848,7 +848,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                 />
                             </div>
                         )}
-                        {currentUser.role === 'root' && editingUser.role !== 'root' ? (
+                        {currentUser.role === 'root' ? (
                             <div className="mt-4">
                                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Permissões</h4>
                                 <div className="space-y-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg max-h-80 overflow-y-auto">
