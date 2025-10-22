@@ -88,6 +88,7 @@ const StockControl = ({ onLogout, currentUser }) => {
     handleServicoInputChange,
     handleAddServico,
     handleUpdateServico,
+    hasAdminAccessPermission,
   } = useEstoqueContext();
 
   const navigate = useNavigate();
@@ -274,22 +275,22 @@ const StockControl = ({ onLogout, currentUser }) => {
         {/* Cabeçalho da página com título e botões de navegação */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Controle de Estoque</h1>
-          <div>
+          <div className="flex items-center gap-2 md:gap-4">
             <button onClick={() => navigate('/vendas')} className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors mr-4" title="Página de Vendas">
               <ShoppingCart size={20} />
               <span className="hidden sm:inline">Página de Vendas</span>
             </button>
-            <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mr-4" title="Ver Site">
+            <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors" title="Ver Site">
               <ArrowLeft size={20} />
               <span className="hidden sm:inline">Ver Site</span>
             </a>
-            {(currentUser.role === 'admin' || currentUser.role === 'root') && (
-              <button onClick={() => navigate('/admin')} className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors mr-4" title="Painel de Administração">
+            {hasAdminAccessPermission && (
+              <button onClick={() => navigate('/admin')} className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors" title="Painel de Administração">
                 <Settings size={20} />
                 <span className="hidden sm:inline">Administração</span>
               </button>
             )}
-            <button onClick={onLogout} className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors ml-2" title="Sair">
+            <button onClick={onLogout} className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors" title="Sair">
               <LogOut size={20} />
               <span className="hidden sm:inline">Sair</span>
             </button>

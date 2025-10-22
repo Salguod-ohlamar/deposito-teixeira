@@ -13,7 +13,7 @@ const HomePage = lazy(() => import('./HomePage.jsx'));
 const StockControl = lazy(() => import('./components/StockControl.jsx'));
 const VendasPage = lazy(() => import('./components/VendasPage.jsx'));
 const ClientesPage = lazy(() => import('./components/ClientesPage.jsx'));
-import { PERMISSION_GROUPS } from './components/useEstoque.jsx';
+import { useEstoqueContext, PERMISSION_GROUPS } from './components/useEstoque.jsx';
 const AdminPage = lazy(() => import('./AdminPage.jsx'));
 
 const AppContent = () => {
@@ -25,7 +25,7 @@ const AppContent = () => {
         localStorage.setItem('boycell-token', token); // Salva o token
         setCurrentUser(user);
         setIsLoginModalOpen(false);
-        // Admin/root goes to stock control, vendedor goes to sales page
+        // Admin/root/vendedor com permissão vai para estoque, senão para vendas
         if (user.role === 'root' || user.permissions?.editProduct || user.permissions?.manageUsers) {
             navigate('/estoque');
         } else {
@@ -66,15 +66,12 @@ const AppContent = () => {
 
                             {/* Rotas para Estoque, Clientes, Admin: Acessíveis por permissão */}
                             <Route element={
-                                <ProtectedRoute 
-                                    user={currentUser} 
-                                    requiredPermission={[
-                                        ...Object.keys(PERMISSION_GROUPS.products.permissions),
-                                        ...Object.keys(PERMISSION_GROUPS.services.permissions),
-                                        ...Object.keys(PERMISSION_GROUPS.admin.permissions),
-                                        ...Object.keys(PERMISSION_GROUPS.root.permissions),
-                                    ]} 
-                                    redirectPath="/vendas" />}>
+                                <ProtectedRoute
+                                    user={currentUser}
+                                    // Qualquer permissão de produto ou serviço dá acesso ao /estoque
+                                    requiredPermission={[...Object.keys(PERMISSION_GROUPS.products.permissions), ...Object.keys(PERMISSION_GROUPS.services.permissions)]}
+                                    redirectPath="/vendas"
+                                />}>
                                 <Route path="/estoque" element={<StockControl onLogout={handleLogout} currentUser={currentUser} />} />
                                 <Route path="/admin" element={<AdminPage onLogout={handleLogout} currentUser={currentUser} />} />
                             </Route>

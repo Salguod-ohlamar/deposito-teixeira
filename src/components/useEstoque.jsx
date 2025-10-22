@@ -30,18 +30,18 @@ export const PERMISSION_GROUPS = {
     products: {
         title: 'Produtos',
         permissions: {
-            addProduct: { label: 'Adicionar Produto', roles: ['root', 'admin'] },
-            editProduct: { label: 'Editar Produto', roles: ['root', 'admin'] },
+            addProduct: { label: 'Adicionar Produto', roles: ['root', 'admin', 'user'] },
+            editProduct: { label: 'Editar Produto', roles: ['root', 'admin', 'user'] },
             deleteProduct: { label: 'Excluir Produto', roles: ['root', 'admin'] },
-            exportCsv: { label: 'Exportar CSV de Produtos', roles: ['root', 'admin'] },
+            exportCsv: { label: 'Exportar CSV de Produtos', roles: ['root', 'admin', 'user'] },
             viewProductHistory: { label: 'Visualizar Histórico do Produto', roles: ['root', 'admin'] },
         }
     },
     services: {
         title: 'Serviços',
         permissions: {
-            addService: { label: 'Adicionar Serviço', roles: ['root', 'admin'] },
-            editService: { label: 'Editar Serviço', roles: ['root', 'admin'] },
+            addService: { label: 'Adicionar Serviço', roles: ['root', 'admin', 'user'] },
+            editService: { label: 'Editar Serviço', roles: ['root', 'admin', 'user'] },
             deleteService: { label: 'Excluir Serviço', roles: ['root', 'admin'] },
             viewServiceHistory: { label: 'Visualizar Histórico do Serviço', roles: ['root', 'admin'] },
         }
@@ -49,18 +49,18 @@ export const PERMISSION_GROUPS = {
     siteContent: {
         title: 'Conteúdo do Site',
         permissions: {
-            manageBanners: { label: 'Gerenciar Banners', roles: ['root', 'admin'] },
+            manageBanners: { label: 'Gerenciar Banners', roles: ['root', 'admin', 'user'] },
         }
     },
     admin: {
         title: 'Administração',
         permissions: {
-            viewDashboardCharts: { label: 'Ver Análise Gráfica', roles: ['root'] },
+            viewDashboardCharts: { label: 'Ver Análise Gráfica', roles: ['root', 'admin'] },
             viewSalesHistory: { label: 'Ver Histórico de Vendas', roles: ['root', 'admin'] },
             viewUserSalesReport: { label: 'Ver Relatório por Vendedor', roles: ['root', 'admin'] },
             viewDreReport: { label: 'Ver DRE Simplificado', roles: ['root', 'admin'] },
-            viewActivityLog: { label: 'Ver Log de Atividades', roles: ['root'] },
-            manageClients: { label: 'Gerenciar Clientes', roles: ['root', 'admin'] },
+            viewActivityLog: { label: 'Ver Log de Atividades', roles: ['root', 'admin'] },
+            manageClients: { label: 'Gerenciar Clientes', roles: ['root', 'admin', 'user'] },
         }
     },
     root: {
@@ -1450,12 +1450,11 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         if (currentUser.role === 'root' || currentUser.role === 'admin') return true;
         if (!currentUser.permissions) return false;
 
-        // Lista de permissões que garantem acesso ao painel de administração
+        // Lista de permissões que garantem acesso ao painel de administração para um 'user'
         const adminAccessPermissions = [
             ...Object.keys(PERMISSION_GROUPS.admin.permissions),
             ...Object.keys(PERMISSION_GROUPS.root.permissions),
             ...Object.keys(PERMISSION_GROUPS.siteContent.permissions),
-            'manageClients' // Adicionado explicitamente caso esteja em outro grupo
         ];
 
         // Verifica se o usuário tem pelo menos uma dessas permissões

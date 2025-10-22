@@ -5,10 +5,9 @@ import { Toaster, toast } from 'react-hot-toast';
 import ReciboVenda from './ReciboVenda';
 import Modal from './Modal.jsx';
 import { validateCPF, validatePhone } from './formatters.js';
-import { useEstoqueContext } from './EstoqueContext.jsx';
+import { useEstoqueContext, PERMISSION_GROUPS } from './components/useEstoque.jsx';
 import { PERMISSION_GROUPS } from './components/useEstoque.jsx';
 import { useTheme } from './ThemeContext.jsx';
-
 const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue, onToggle }) => {
     const Icon = icon;
     return (
@@ -426,17 +425,16 @@ const VendasPage = ({ onLogout, currentUser }) => {
         );
     }, [servicos, servicoSearchTerm]);
 
-    const hasStockPermission = useMemo(() => {
+    const hasManagementPermission = useMemo(() => {
         if (!currentUser) return false;
         // Garante que admin e root sempre tenham acesso
-        if (['admin', 'root', 'vendedor'].includes(currentUser.role)) return true;
+        if (['admin', 'root'].includes(currentUser.role)) return true;
         if (!currentUser?.permissions) return false;
 
         // Qualquer permissão dentro destes grupos garante o acesso ao botão de gerenciamento
         const managementPermissions = [
             ...Object.keys(PERMISSION_GROUPS.products.permissions),
             ...Object.keys(PERMISSION_GROUPS.services.permissions),
-            ...Object.keys(PERMISSION_GROUPS.siteContent.permissions),
         ];
 
         return managementPermissions.some(key => !!currentUser.permissions[key]);
@@ -453,8 +451,8 @@ const VendasPage = ({ onLogout, currentUser }) => {
                     <nav className="container mx-auto flex items-center justify-between p-4">
                         <h1 className="text-2xl font-bold text-white">Olá, {currentUser?.name?.split(' ')[0] || 'Vendedor'}!</h1>
                         <div>
-                            {hasStockPermission && (
-                                <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mr-6" title="Gerenciar Estoque">
+                            {hasManagementPermission && (
+                                <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mr-4" title="Gerenciar Estoque">
                                     <Edit size={20} />
                                     <span className="hidden sm:inline">Gerenciar Estoque</span>
                                 </button>
