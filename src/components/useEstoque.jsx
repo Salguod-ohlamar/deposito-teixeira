@@ -218,8 +218,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 setLoadingServicos(false);
             }
         };
-        fetchServicos();
-    }, []);
+        if (currentUser) {
+            fetchServicos();
+        }
+    }, [currentUser]);
 
     const [isAddServicoModalOpen, setIsAddServicoModalOpen] = useState(false);
     const [isEditServicoModalOpen, setIsEditServicoModalOpen] = useState(false);
@@ -1017,6 +1019,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 body: JSON.stringify(userPermissions)
             });
 
+            const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.message || 'Erro ao criar usuário.');
             }

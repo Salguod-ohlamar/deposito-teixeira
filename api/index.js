@@ -430,10 +430,10 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), // $1 - $6
-            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, // $7 - $12
-            JSON.stringify(historico), !!is_offer, // $13, $14
-            id // $15
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            JSON.stringify(historico), !!is_offer,
+            id
         ];
 
         const { rows } = await db.query(query, values);
