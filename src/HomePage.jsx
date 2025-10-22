@@ -1,33 +1,124 @@
 //HomePge.jsx
 
 import React, { useState, useEffect } from 'react';
-import { User, Menu, X } from 'lucide-react';
+import { User, Menu, X, Search, Phone, MapPin, MessageCircle, ShoppingCart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import BrandText from './components/BrandText.jsx';
 import Button from './components/Button.jsx';
 import ProductCard from './components/ProductCard.jsx';
 import WhatsAppButton from './components/WhatsAppButton.jsx';
-import LocationMap from './LocationMap.jsx';
 import BannerCarousel from './components/BannerCarousel.jsx';
-import Modal from './components/Modal.jsx';
+import Modal from './components/Modal.jsx'; 
+import LocationMap from './LocationMap.jsx';
 
-const navLinksData = [
-  { title: 'Início', href: '#inicio' },
-  { title: 'Produtos', href: '#produtos' },
-  { title: 'Serviços', href: '#servicos' },
-  { title: 'Localização', href: '#localizacao' },
-];
+// Importando os logotipos da pasta 'src/image/'
+import tigreLogo from './image/tigre.png';
+import amancoLogo from './image/amanco.png';
+import elginLogo from './image/elgin.png';
+import oroluxLogo from './image/orolux.png';
+import votoranLogo from './image/votorantim.png';
+import caueLogo from './image/caue.png';
 
+
+//Import do logo das categorias
+import tintas from './image/pintura.jpg';
+import ferramentas from './image/ferramentas.jpg';
+import eletrica from './image/eletrica.jpg';
+import hidraulica from './image/hidraulicai.jpg';
+// --- Componentes de UI específicos para a nova Home ---
+
+/**
+ * Barra superior com informações de contato e localização.
+ */
+const TopBar = () => (
+    <div className="bg-gray-100 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-300">
+        <div className="container mx-auto flex justify-center md:justify-between items-center px-4 py-1">
+            <div className="flex items-center space-x-4">
+                <a href="tel:551100000000" className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"><Phone size={14} className="mr-1" /> (11) 0000-0000</a>
+                <a href="https://wa.me/5511941341795" target="_blank" rel="noopener noreferrer" className="flex items-center hover:text-gray-900 dark:hover:text-white transition-colors"><MessageCircle size={14} className="mr-1" /> WhatsApp</a>
+            </div>
+            <div className="hidden md:flex items-center">
+                <a href="#localizacao" className="flex items-center hover:text-gray-900 dark:hover:text-white"><MapPin size={14} className="mr-1" /> Nossas Lojas</a>
+            </div>
+        </div>
+    </div>
+);
+
+/**
+ * Grade de categorias de produtos com imagens e links.
+ */
+const  CategoryGrid = () => {
+    const categories = [
+        { name: 'Pisos e Revestimentos', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80' },
+        { name: 'Banheiros e Cozinhas', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=500&q=80' },
+        { name: 'Tintas e Acessórios', img: tintas },
+        { name: 'Elétrica e Iluminação', img: eletrica },
+        { name: 'Hidráulica', img: hidraulica },
+        { name: 'Ferramentas', img: ferramentas },
+    ];
+
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {categories.map(cat => (
+                <Link to={`/categoria/${encodeURIComponent(cat.name)}`} key={cat.name} className="group block text-center">
+                    <div className="overflow-hidden rounded-lg">
+                        <img src={cat.img} alt={cat.name} className="w-full h-48 object-cover transition-transform duration-300" />
+                    </div>
+                    <h3 className="mt-3 font-semibold text-gray-800 dark:text-gray-200 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">{cat.name}</h3>
+                </Link>
+            ))}
+        </div>
+    );
+};
+
+/**
+ * Seção que exibe os logotipos das marcas parceiras.
+ */
+const BrandsSection = () => {
+    const brands = [
+        tigreLogo,
+        amancoLogo,
+        elginLogo,
+        oroluxLogo,
+        votoranLogo,
+        caueLogo,
+    ];
+
+    return (
+        <div className="bg-gray-100 dark:bg-gray-900 py-20">
+            <div className="container mx-auto px-4">
+                <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">As melhores marcas</h2>
+                <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                    {brands.map((logo, index) => (
+                        <img key={index} src={logo} alt={`Marca ${index + 1}`} className="h-10 md:h-12 object-contain grayscale opacity-70 transition-opacity" />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Fim dos Componentes de UI ---
+
+/**
+ * Componente principal da página inicial.
+ * Gerencia o estado da página, busca dados de produtos e banners, e renderiza as seções.
+ * @param {object} props - Propriedades do componente.
+ * @param {Function} props.onLoginClick - Função a ser chamada quando o botão de login é clicado.
+ */
 const HomePage = ({ onLoginClick }) => {
-    const [productsByCategory, setProductsByCategory] = useState({});
-    const [featuredServices, setFeaturedServices] = useState([]);
+    const [featuredProducts, setFeaturedProducts] = useState([]);
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLgpdModalOpen, setIsLgpdModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const API_URL = import.meta.env.VITE_API_URL || '';
 
+    /**
+     * Efeito para carregar os dados iniciais da página (banners e produtos) da API.
+     */
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
@@ -41,26 +132,12 @@ const HomePage = ({ onLoginClick }) => {
                 if (!productsResponse.ok) throw new Error('Falha ao buscar produtos.');
                 const products = await productsResponse.json();
 
-                const featuredProducts = products.filter(p => p.destaque === true);
-                const groupedProducts = featuredProducts.reduce((acc, product) => {
-                    const category = product.categoria || 'Outros';
-                    if (!acc[category]) acc[category] = [];
-                    acc[category].push(product);
-                    return acc;
-                }, {});
-                setProductsByCategory(groupedProducts);
-
-                // Fetch services
-                const servicesResponse = await fetch(`${API_URL}/api/services`);
-                if (!servicesResponse.ok) throw new Error('Falha ao buscar serviços.');
-                const services = await servicesResponse.json();
-                setFeaturedServices(services.filter(s => s.destaque === true));
+                setFeaturedProducts(products.filter(p => p.destaque === true));
 
             } catch (error) {
                 console.error("Erro ao carregar dados da página inicial:", error);
-                setProductsByCategory({});
+                setFeaturedProducts([]);
                 setBanners([]);
-                setFeaturedServices([]);
             } finally {
                 setLoading(false);
             }
@@ -68,113 +145,154 @@ const HomePage = ({ onLoginClick }) => {
         loadData();
     }, []);
 
+    /**
+     * Manipulador para o clique no botão "Comprar", que abre o WhatsApp com uma mensagem pré-definida.
+     * @param {object} item - O produto ou serviço a ser comprado.
+     */
     const handleComprarClick = (item) => {
-        const phoneNumber = "5511986366982";
-        const itemName = item.name;
+        const phoneNumber = "5511941341795"; // Substitua pelo seu número
+        const itemName = item.name || item.servico;
         const itemPrice = item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const message = `Olá! Gostaria de saber se o item "${itemName}" no valor de ${itemPrice} está disponível.`;
+        const message = `Olá, Teixeira! Tenho interesse no produto "${itemName}" (cód: ${item.id}) no valor de ${itemPrice}. Ele está disponível?`;
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
+    /**
+     * Manipulador para a submissão do formulário de busca.
+     * @param {React.FormEvent} e - O evento do formulário.
+     */
+    const handleSearch = (e) => {
+        e.preventDefault();
+        alert(`Buscando por: "${searchTerm}"... (funcionalidade a ser implementada)`);
+        // Aqui você pode redirecionar para uma página de resultados de busca
+        // Ex: navigate(`/busca?q=${searchTerm}`);
+    };
+
     return (
-        <div className="bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-sm shadow-lg">
-                <nav className="container mx-auto flex items-center justify-between p-4 md:p-6">
-                    <div className="text-2xl"><BrandText>Boycell</BrandText></div>
-                    <div className="hidden md:flex space-x-8">
-                        {navLinksData.map((link) => (
-                            <a key={link.href} href={link.href} className="text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-colors duration-300">{link.title}</a>
-                        ))}
+        <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
+            <header className="sticky top-0 z-50 bg-white/90 dark:bg-gray-950/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+                {/* <TopBar /> */}
+                <div className="container mx-auto flex items-center justify-between p-4 gap-4">
+                    <div className="text-xl lg:text-2xl font-bold tracking-wider text-gray-900 dark:text-white whitespace-nowrap"><a href="/">Teixeira Depósito de Materiais</a></div>
+                    
+                    <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-xl">
+                        <input 
+                            type="text" 
+                            placeholder="O que você está construindo hoje?" 
+                            className="w-full px-4 py-2 border border-r-0 border-gray-300 dark:border-gray-700 rounded-l-md focus:ring-gray-500 focus:border-gray-500 bg-white dark:bg-gray-800"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <Button type="submit" variant="secondary" className="rounded-l-none !rounded-r-md border-gray-300 dark:border-gray-700"><Search size={20} className="text-gray-600 dark:text-gray-400" /></Button>
+                    </form>
+
+                    <div className="flex items-center space-x-2 md:space-x-4">
+                        <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex">
+                            <User size={24} />
+                        </Button>
+                        <div className="lg:hidden">
+                            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu"><Menu size={24} /></Button>
+                        </div>
                     </div>
-                    <div className="hidden md:flex items-center space-x-4">
-                        <Button variant="icon" size="icon" onClick={onLoginClick} aria-label="Acessar conta"><User size={24} /></Button>
-                    </div>
-                    <div className="md:hidden">
-                        <Button variant="icon" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu"><Menu size={24} /></Button>
-                    </div>
-                </nav>
+                </div>
             </header>
 
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-50 bg-white/95 dark:bg-gray-950/95 md:hidden animate-fade-in">
+                <div className="fixed inset-0 z-[100] bg-white/95 dark:bg-gray-950/95 lg:hidden animate-fade-in">
                     <div className="container mx-auto p-4">
                         <div className="flex justify-between items-center">
-                            <div className="text-2xl"><BrandText>Boycell</BrandText></div>
-                            <Button variant="icon" size="icon" onClick={() => setIsMobileMenuOpen(false)} aria-label="Fechar menu"><X size={24} /></Button>
+                            <div className="text-xl font-bold tracking-wider text-gray-900 dark:text-white">Teixeira Depósito de Materiais</div>
+                            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} aria-label="Fechar menu"><X size={24} /></Button>
                         </div>
                         <nav className="mt-16 flex flex-col items-center space-y-8">
-                            {navLinksData.map((link) => (
-                                <a key={link.href} href={link.href} className="text-2xl font-medium text-gray-800 dark:text-gray-200 hover:text-green-500 dark:hover:text-green-400" onClick={() => setIsMobileMenuOpen(false)}>{link.title}</a>
-                            ))}
-                            <Button variant="primary" size="md" onClick={() => { onLoginClick(); setIsMobileMenuOpen(false); }}><User size={20} className="mr-2" />Acessar Conta</Button>
+                            <Button variant="secondary" size="lg" onClick={() => { onLoginClick(); setIsMobileMenuOpen(false); }}><User size={20} className="mr-2" />Acessar Conta</Button>
                         </nav>
                     </div>
                 </div>
             )}
 
-            <main className="container mx-auto px-4 py-8 md:py-16">
-                <section id="inicio" className="text-center py-20 md:py-32">
-                    <div className="relative z-10 space-y-6">
-                        <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white"><BrandText>Boycell</BrandText>: Conectando você ao futuro</h1>
-                        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">Periféricos de ponta e conserto especializado para o seu universo móvel.</p>
-                        <div className="!mt-12 max-w-5xl mx-auto">
-                            <BannerCarousel banners={banners} />
-                        </div>
-                        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                           
-                        </div>
+            <main>
+                <section id="inicio">
+                    <BannerCarousel banners={banners} />
+                </section>
+
+                <section id="categorias" className="py-24">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Navegue por Categorias</h2>
+                        <CategoryGrid />
                     </div>
                 </section>
 
-                <section id="produtos" className="mt-20">
-                    <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Nossos <span className="text-green-500 dark:text-green-400">produtos</span></h2>
-                    {loading ? (<div className="text-center text-lg text-gray-500 dark:text-gray-400">Carregando produtos...</div>) : (
-                        <div className="space-y-16">
-                            {Object.keys(productsByCategory).length > 0 ? (Object.entries(productsByCategory).map(([category, items]) => (
-                                <div key={category}>
-                                    <h3 className="text-2xl md:text-3xl font-bold mb-8 border-b-2 border-green-500/30 pb-2 text-gray-900 dark:text-white">{category}</h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                                        {items.map(product => (<ProductCard key={product.id} product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} onComprarClick={handleComprarClick} />))}
-                                    </div>
-                                </div>
-                            ))) : (<p className="text-center text-gray-500 dark:text-gray-500">Nenhum produto encontrado no estoque.</p>)}
+                <section id="ofertas" className="py-24 bg-gray-100 dark:bg-gray-900">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Ofertas em Destaque</h2>
+                        {loading ? (
+                            <div className="text-center text-lg text-gray-500 dark:text-gray-400">Carregando ofertas...</div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                {featuredProducts.length > 0 ? (
+                                    featuredProducts.map(product => (
+                                        <ProductCard 
+                                            key={product.id} 
+                                            product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} 
+                                            onComprarClick={handleComprarClick} 
+                                        />
+                                    ))
+                                ) : (
+                                    <p className="col-span-full text-center text-gray-500 dark:text-gray-500">Nenhuma oferta em destaque no momento.</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <BrandsSection />
+
+                <section id="localizacao" className="py-24">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Nossa localização</h2>
+                        <div className="text-center">
+                            <p className="mb-4">Venha nos visitar! Estamos prontos para te atender.</p>
+                            <p className="font-semibold">R. Pinha do Brejo, 243 - Jardim Maia, São Paulo - SP, 08180-320</p>
+
+                            <div className="mt-8 w-full h-96"><LocationMap /></div>
                         </div>
-                    )}
+                    </div>
                 </section>
-
-                <section id="servicos" className="mt-20">
-                    <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Conserto de <span className="text-green-500 dark:text-green-400">celulares</span></h2>
-                    {loading ? (<div className="text-center text-lg text-gray-500 dark:text-gray-400">Carregando serviços...</div>) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {featuredServices.length > 0 ? (featuredServices.map(service => (<ProductCard key={service.id} product={{ type: 'servico', id: service.id, name: service.servico, price: service.precoFinal, image: service.imagem, description: `Reparo: ${service.tipoReparo}` }} onComprarClick={handleComprarClick} />))) : (<p className="col-span-full text-center text-gray-500 dark:text-gray-500">Nenhum serviço em destaque no momento.</p>)}
-                        </div>
-                    )}
-                </section>
-
-                <section id="localizacao" className="mt-20">
-                    <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white">Nossa <span className="text-green-500 dark:text-green-400">localização</span></h2>
-                    <LocationMap />
-                </section>
-
             </main>
 
-            <footer className="bg-gray-100 dark:bg-gray-900 mt-20 py-8 text-gray-600 dark:text-gray-400">
-                <div className="container mx-auto px-4 text-center md:flex md:justify-between md:items-center">
-                    <div className="mb-4 md:mb-0"><div className="text-2xl"><BrandText>Boycell</BrandText></div><p className="mt-2 text-sm text-gray-700 dark:text-gray-400">Tecnologia e cuidado para o seu dispositivo.</p></div>
-                    <div className="mb-4 md:mb-0 space-y-2"><h4 className="font-semibold text-gray-800 dark:text-gray-200">Links Úteis</h4><a href="#servicos" className="block text-sm hover:text-green-500 dark:hover:text-green-400 transition-colors duration-300">Serviços</a><a href="#produtos" className="block text-sm hover:text-green-500 dark:hover:text-green-400 transition-colors duration-300">Produtos</a></div>
+            <footer className="bg-gray-200 dark:bg-gray-900 mt-16 py-10 text-gray-600 dark:text-gray-400">
+                <div className="container mx-auto px-4 text-center md:text-left md:flex md:justify-between">
+                    <div className="mb-6 md:mb-0">
+                        <div className="text-2xl font-bold tracking-wider text-gray-800 dark:text-white">Teixeira Depósito de Materiais</div>
+                        <p className="mt-2 text-sm">Tudo para sua obra, do básico ao acabamento.</p>
+                    </div>
+                    <div className="mb-6 md:mb-0">
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Institucional</h4>
+                        <a href="#" className="block text-sm hover:text-gray-900 dark:hover:text-white transition-colors">Sobre Nós</a>
+                        <a href="#localizacao" className="block text-sm hover:text-gray-900 dark:hover:text-white transition-colors mt-1">Nossas Lojas</a>
+                    </div>
+                    <div className="mb-6 md:mb-0">
+                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Atendimento</h4>
+                        <p className="text-sm">Seg. a Sáb. das 8h às 18h</p>
+                        <p className="text-sm">(11) 0000-0000</p>
+                    </div>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-800 mt-8 pt-4 text-center text-sm">
-                    <p>© 2025 Boycell. Todos os direitos reservados. | <button onClick={() => setIsLgpdModalOpen(true)} className="underline hover:text-green-500 dark:hover:text-green-400 transition-colors">Política de Privacidade (LGPD)</button></p>
+                <div className="border-t border-gray-300 dark:border-gray-800 mt-8 pt-6 text-center text-sm">
+                    <p>© {new Date().getFullYear()} Teixeira Materiais para Construção. Todos os direitos reservados.</p>
+                    <p className="mt-2">
+                        <button onClick={() => setIsLgpdModalOpen(true)} className="underline hover:text-gray-900 dark:hover:text-white transition-colors">Política de Privacidade</button>
+                    </p>
                 </div>
             </footer>
 
-            <WhatsAppButton phoneNumber="5511986366982" message="Olá! Gostaria de mais informações sobre seus produtos e serviços." />
+            <WhatsAppButton phoneNumber="5511941341795" message="Olá! Gostaria de mais informações sobre seus produtos." />
 
             <Modal isOpen={isLgpdModalOpen} onClose={() => setIsLgpdModalOpen(false)} size="lg">
-                <h2 className="text-2xl font-bold text-center text-green-500 dark:text-green-400 mb-6">Política de Privacidade e Proteção de Dados (LGPD)</h2>
+                <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">Política de Privacidade e Proteção de Dados (LGPD)</h2>
                 <div className="text-gray-700 dark:text-gray-300 space-y-4 max-h-[70vh] overflow-y-auto pr-4 text-sm">
-                    <p>A <strong>Boycell</strong>, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), está comprometida em proteger a sua privacidade e garantir a segurança dos seus dados pessoais. Esta política explica como coletamos, usamos, compartilhamos e protegemos suas informações.</p>
+                    <p>A <strong>Teixeira Materiais para Construção</strong>, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), está comprometida em proteger a sua privacidade e garantir a segurança dos seus dados pessoais. Esta política explica como coletamos, usamos, compartilhamos e protegemos suas informações.</p>
                     
                     <h3 className="font-semibold text-lg text-gray-900 dark:text-white pt-2">1. Coleta de Dados</h3>
                     <p>Coletamos dados pessoais que você nos fornece diretamente ao se cadastrar em nosso sistema, realizar uma compra ou solicitar um serviço. Os dados coletados podem incluir: nome completo, CPF/CNPJ, endereço de e-mail, número de telefone e histórico de compras/serviços.</p>
@@ -185,12 +303,12 @@ const HomePage = ({ onLoginClick }) => {
                         <li>Processar suas compras e ordens de serviço.</li>
                         <li>Gerenciar seu cadastro e histórico para facilitar futuras interações.</li>
                         <li>Emitir notas fiscais e comprovantes de venda.</li>
-                        <li>Comunicar sobre o andamento de serviços e informações sobre produtos, quando solicitado.</li>
+                        <li>Comunicar sobre informações de produtos, quando solicitado.</li>
                         <li>Cumprir obrigações legais e regulatórias.</li>
                     </ul>
 
                     <h3 className="font-semibold text-lg text-gray-900 dark:text-white pt-2">3. Compartilhamento de Dados</h3>
-                    <p>A Boycell não compartilha seus dados pessoais com terceiros para fins de marketing. O compartilhamento pode ocorrer apenas com autoridades governamentais para cumprimento de obrigações legais ou em caso de requisição judicial.</p>
+                    <p>A Teixeira Materiais para Construção não compartilha seus dados pessoais com terceiros para fins de marketing. O compartilhamento pode ocorrer apenas com autoridades governamentais para cumprimento de obrigações legais ou em caso de requisição judicial.</p>
 
                     <h3 className="font-semibold text-lg text-gray-900 dark:text-white pt-2">4. Seus Direitos</h3>
                     <p>Como titular dos dados, você tem o direito de:</p>

@@ -670,7 +670,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         <div className="flex flex-col gap-3">
                             {currentUser?.permissions?.manageTheme && (
                                 <button onClick={toggleTheme} className={actionButtonClasses}>
-                                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />} Alterar para Tema {theme === 'dark' ? 'Claro' : 'Escuro'}
+                                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />} Alterar para Tema {theme === 'dark' ? 'Claro' : 'dark'}
                                 </button>
                             )}
                             {currentUser?.permissions?.manageBackup && (
