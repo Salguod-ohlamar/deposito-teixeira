@@ -477,3 +477,897 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             return newState;
         });
     };
+
+    const handleUpdateProduct = async (e, adminName) => {
+        e.preventDefault();
+        if (!editingProduct) return;
+    
+        const oldItem = estoque.find(item => item.id === editingProduct.id);
+        if (!oldItem) return;
+    
+        const newHistorico = [...(oldItem.historico || [])];
+        const changes = [];
+        const fieldsToCompare = {
+            nome: 'Nome', marca: 'Marca', categoria: 'Categoria', destaque: 'Destaque na Home',
+            fornecedor: 'Fornecedor', emEstoque: 'Estoque', qtdaMinima: 'Qtda. Mínima',
+            preco: 'Preço', tempoDeGarantia: 'Garantia (dias)', precoFinal: 'Preço Final',
+        };
+    
+        for (const key in fieldsToCompare) {
+            const oldValue = oldItem[key];
+            const newValue = editingProduct[key];
+            if (String(oldValue ?? '') !== String(newValue ?? '')) {
+                const displayOld = key === 'destaque' ? (!!oldValue ? 'Sim' : 'Não') : (oldValue ?? 'N/A');
+                const displayNew = key === 'destaque' ? (!!newValue ? 'Sim' : 'Não') : (newValue ?? 'N/A');
+                changes.push(`${fieldsToCompare[key]} alterado de "${displayOld}" para "${displayNew}"`);
+            }
+        }
+    
+        if (changes.length > 0) {
+            newHistorico.push({ data: new Date(), acao: 'Produto Atualizado', detalhes: changes.join('; ') });
+            logAdminActivity(adminName, 'Atualização de Produto', `Produto "${oldItem.nome}" atualizado: ${changes.join('; ')}.`);
+        }
+    
+        const productToUpdate = {
+            ...editingProduct,
+            emEstoque: parseInt(editingProduct.emEstoque, 10),
+            qtdaMinima: parseInt(editingProduct.qtdaMinima, 10),
+            preco: parseFloat(editingProduct.preco),
+            precoFinal: parseFloat(editingProduct.precoFinal),
+            tempoDeGarantia: parseInt(editingProduct.tempoDeGarantia, 10) || 0,
+            historico: newHistorico,
+        };
+    
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/products/${editingProduct.id}`, {
+                method: 'PUT',
+                // Headers are added by makeAuthRequest
+                body: JSON.stringify(productToUpdate)
+            });
+    
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar produto.');
+    
+            setEstoque(currentEstoque => currentEstoque.map(item => (item.id === editingProduct.id ? data : item)));
+            toast.success('Produto atualizado com sucesso!');
+            handleCloseEditModal();
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const handleExcluirProduto = async (idProduto, adminName) => {
+        const productToDelete = estoque.find(item => item.id === idProduto);
+        if (!productToDelete) return;
+
+        if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+            try {
+                const response = await makeAuthRequest(`${API_URL}/api/products/${idProduto}`, {
+                    method: 'DELETE',
+                    // Headers are added by makeAuthRequest
+                });
+    
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erro ao excluir produto.');
+    
+                setEstoque(currentEstoque => currentEstoque.filter(item => item.id !== idProduto));
+                logAdminActivity(adminName, 'Exclusão de Produto', `Produto "${productToDelete.nome}" (ID: ${idProduto}) foi excluído.`);
+                toast.success(data.message);
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
+
+    // ===================================================================
+    // PRODUCT DERIVED STATE (SORT, FILTER, PAGINATE)
+    // ===================================================================
+    // Sorting handler
+    const handleSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Derived state calculations (filtering, sorting, pagination)
+    const filteredEstoque = useMemo(() =>
+        estoque.filter(item => {
+            const searchMatch = (item.nome || '').toLowerCase().includes(searchTerm.toLowerCase());
+            const stockMatch = !showLowStockOnly || (Number(item.emEstoque) <= Number(item.qtdaMinima));
+            return searchMatch && stockMatch;
+        }), [estoque, searchTerm, showLowStockOnly]);
+
+    const sortedEstoque = useMemo(() => {
+        let sortableItems = [...filteredEstoque];
+        if (sortConfig.key) {
+            sortableItems.sort((a, b) => {
+                let valA = a[sortConfig.key];
+                let valB = b[sortConfig.key];
+
+                // Sorting is simpler with numbers
+                if (['preco', 'precoFinal', 'emEstoque', 'qtdaMinima'].includes(sortConfig.key)) {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                } else {
+                    // Fallback for other string-based columns
+                    valA = String(valA || '');
+                    valB = String(valB || '');
+                }
+                if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [filteredEstoque, sortConfig]);
+
+    const totalPages = Math.ceil(sortedEstoque.length / itemsPerPage);
+
+    const paginatedEstoque = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return sortedEstoque.slice(startIndex, startIndex + itemsPerPage);
+    }, [sortedEstoque, currentPage]);
+
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(1);
+        }
+    }, [currentPage, totalPages]);
+
+    // ===================================================================
+    // SERVICE HANDLERS
+    // ===================================================================
+    const handleOpenAddServicoModal = () => setIsAddServicoModalOpen(true);
+    const handleCloseAddServicoModal = () => {
+        setIsAddServicoModalOpen(false);
+        setNewServico({ servico: '', fornecedor: '', marca: '', tipoReparo: '', tecnico: '', preco: '', precoFinal: '', imagem: '', markup: '', destaque: true, is_offer: false, tempoDeGarantia: '' });
+    };
+
+    const handleOpenEditServicoModal = (servico) => {
+        setEditingServico({ ...servico, markup: servico.markup || '', destaque: servico.destaque ?? false, tempoDeGarantia: servico.tempoDeGarantia || '' });
+        setIsEditServicoModalOpen(true);
+    };
+
+    const handleCloseEditServicoModal = () => {
+        setIsEditServicoModalOpen(false);
+        setEditingServico(null);
+    };
+
+    const handleServicoInputChange = (e) => handleItemChange(e, isEditServicoModalOpen ? setEditingServico : setNewServico);
+
+    // ===================================================================
+    // SERVICE CRUD HANDLERS
+    // ===================================================================
+    const handleAddServico = async (e, adminName) => {
+        e.preventDefault();
+        if (!newServico.servico || !newServico.fornecedor || !newServico.marca || !newServico.tipoReparo || !newServico.tecnico || !newServico.preco || !newServico.precoFinal) {
+            toast.error('Por favor, preencha todos os campos.');
+            return;
+        }
+    
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/services`, {
+                method: 'POST',
+                // Headers are added by makeAuthRequest
+                body: JSON.stringify({
+                    ...newServico,
+                    preco: parseFloat(newServico.preco),
+                    precoFinal: parseFloat(newServico.precoFinal),
+                    tempoDeGarantia: parseInt(newServico.tempoDeGarantia, 10) || 0,
+                })
+            });
+    
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao adicionar serviço.');
+    
+            setServicos(prev => [...prev, data]);
+            logAdminActivity(adminName, 'Criação de Serviço', `Serviço "${data.servico}" foi criado.`);
+            toast.success('Serviço adicionado com sucesso!');
+            handleCloseAddServicoModal();
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const handleUpdateServico = async (e, adminName) => {
+        e.preventDefault();
+        if (!editingServico) return;
+    
+        const oldServico = servicos.find(s => s.id === editingServico.id);
+        if (!oldServico) return;
+    
+        const newHistorico = [...(oldServico.historico || [])];
+        const changes = [];
+        const fieldsToCompare = {
+            servico: 'Serviço', fornecedor: 'Fornecedor', marca: 'Marca',
+            tipoReparo: 'Tipo de Reparo', tecnico: 'Técnico', tempoDeGarantia: 'Garantia (dias)',
+            preco: 'Preço', precoFinal: 'Preço Final', destaque: 'Destaque',
+        };
+    
+        for (const key in fieldsToCompare) {
+            const oldValue = oldServico[key];
+            const newValue = editingServico[key];
+            if (String(oldValue ?? '') !== String(newValue ?? '')) {
+                const displayOld = key === 'destaque' ? (!!oldValue ? 'Sim' : 'Não') : (oldValue ?? 'N/A');
+                const displayNew = key === 'destaque' ? (!!newValue ? 'Sim' : 'Não') : (newValue ?? 'N/A');
+                changes.push(`${fieldsToCompare[key]} alterado de "${displayOld}" para "${displayNew}"`);
+            }
+        }
+    
+        if (changes.length > 0) {
+            newHistorico.push({ data: new Date(), acao: 'Serviço Atualizado', detalhes: changes.join('; ') });
+            logAdminActivity(adminName, 'Atualização de Serviço', `Serviço "${oldServico.servico}" atualizado: ${changes.join('; ')}.`);
+        }
+    
+        const serviceToUpdate = {
+            ...editingServico,
+            tempoDeGarantia: parseInt(editingServico.tempoDeGarantia, 10) || 0,
+            preco: parseFloat(editingServico.preco),
+            precoFinal: parseFloat(editingServico.precoFinal),
+            historico: newHistorico,
+        };
+    
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/services/${editingServico.id}`, {
+                method: 'PUT',
+                // Headers are added by makeAuthRequest
+                body: JSON.stringify(serviceToUpdate)
+            });
+    
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar serviço.');
+    
+            setServicos(currentServicos => currentServicos.map(s => (s.id === editingServico.id ? data : s)));
+            toast.success('Serviço atualizado com sucesso!');
+            handleCloseEditServicoModal();
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const handleExcluirServico = async (id, adminName) => {
+        const serviceToDelete = servicos.find(s => s.id === id);
+        if (!serviceToDelete) return;
+
+        if (window.confirm('Tem certeza que deseja excluir este serviço?')) {
+            try {
+                const response = await makeAuthRequest(`${API_URL}/api/services/${id}`, {
+                    method: 'DELETE',
+                    // Headers are added by makeAuthRequest
+                });
+    
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erro ao excluir serviço.');
+    
+                setServicos(currentServicos => currentServicos.filter(s => s.id !== id));
+                logAdminActivity(adminName, 'Exclusão de Serviço', `Serviço "${serviceToDelete.servico}" (ID: ${id}) foi excluído.`);
+                toast.success(data.message);
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
+
+    // ===================================================================
+    // SERVICE DERIVED STATE (SORT, FILTER, PAGINATE)
+    // ===================================================================
+    const handleServicoSort = (key) => {
+        let direction = 'ascending';
+        if (servicoSortConfig.key === key && servicoSortConfig.direction === 'ascending') {
+            direction = 'descending';
+        }
+        setServicoSortConfig({ key, direction });
+    };
+
+    const filteredServicos = useMemo(() =>
+        servicos.filter(item =>
+            (item.servico || '').toLowerCase().includes(servicoSearchTerm.toLowerCase())
+        ), [servicos, servicoSearchTerm]);
+
+    const sortedServicos = useMemo(() => {
+        let sortableItems = [...filteredServicos];
+        if (servicoSortConfig.key) {
+            sortableItems.sort((a, b) => {
+                let valA = a[servicoSortConfig.key];
+                let valB = b[servicoSortConfig.key];
+
+                if (['preco', 'precoFinal'].includes(servicoSortConfig.key)) {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                } else {
+                    valA = String(valA || '');
+                    valB = String(valB || '');
+                }
+
+                if (valA < valB) return servicoSortConfig.direction === 'ascending' ? -1 : 1;
+                if (valA > valB) return servicoSortConfig.direction === 'ascending' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [filteredServicos, servicoSortConfig]);
+
+    const totalServicoPages = Math.ceil(sortedServicos.length / itemsPerPage);
+
+    const paginatedServicos = useMemo(() => {
+        const startIndex = (servicoCurrentPage - 1) * itemsPerPage;
+        return sortedServicos.slice(startIndex, startIndex + itemsPerPage);
+    }, [sortedServicos, servicoCurrentPage]);
+
+    // ===================================================================
+    // DASHBOARD DATA
+    // ===================================================================
+    // Dashboard data calculation
+    const dashboardData = useMemo(() => {
+        const valorTotal = estoque.reduce((acc, item) => { 
+            const custo = parseFloat(String(item.preco).replace(',', '.')) || 0;
+            return acc + (custo * (item.emEstoque || 0));
+        }, 0); 
+
+        const sortedByStock = [...estoque].sort((a, b) => (a.emEstoque || 0) - (b.emEstoque || 0));
+        const maisEstoque = [...sortedByStock].reverse().slice(0, 5);
+        const menosEstoque = sortedByStock.slice(0, 5);
+        const totalItems = estoque.reduce((acc, item) => acc + (item.emEstoque || 0), 0);
+
+        const fornecedorDistribution = estoque.reduce((acc, item) => {
+            const fornecedor = item.fornecedor || 'Não especificado';
+            if (!acc[fornecedor]) {
+                acc[fornecedor] = { name: fornecedor, value: 0 };
+            }
+            acc[fornecedor].value += 1;
+            return acc;
+        }, {});
+
+        const categoriaDistribution = estoque.reduce((acc, item) => {
+            const categoria = item.categoria || 'Não especificado';
+            if (!acc[categoria]) {
+                acc[categoria] = { name: categoria, value: 0 };
+            }
+            acc[categoria].value += 1;
+            return acc;
+        }, {});
+
+        const totalVendas = salesHistory.reduce((acc, sale) => acc + Number(sale.total || 0), 0);
+
+        const paymentMethodDistribution = salesHistory.reduce((acc, sale) => {
+            const method = sale.paymentMethod || 'Não definido';
+            if (!acc[method]) {
+                acc[method] = { name: method, value: 0 };
+            }
+            acc[method].value += 1;
+            return acc;
+        }, {});
+
+        const productSales = {};
+        const serviceSales = {};
+
+        salesHistory.forEach(sale => {
+            sale.items.forEach(item => {
+                if (item.type === 'produto') {
+                    if (!productSales[item.id]) productSales[item.id] = { id: item.id, name: item.nome, quantitySold: 0 };
+                    productSales[item.id].quantitySold += item.quantity;
+                } else if (item.type === 'servico') {
+                    if (!serviceSales[item.id]) serviceSales[item.id] = { id: item.id, name: item.servico, quantitySold: 0 };
+                    serviceSales[item.id].quantitySold += item.quantity;
+                }
+            });
+        });
+
+        const topSellingProducts = Object.values(productSales)
+            .sort((a, b) => b.quantitySold - a.quantitySold)
+            .slice(0, 10);
+
+        const topSellingServices = Object.values(serviceSales)
+            .sort((a, b) => b.quantitySold - a.quantitySold)
+            .slice(0, 10);
+
+        return { 
+            valorTotal, totalItems, maisEstoque, menosEstoque, 
+            totalProdutos: estoque.length, fornecedorDistribution: Object.values(fornecedorDistribution), 
+            categoriaDistribution: Object.values(categoriaDistribution), totalVendas, 
+            numeroVendas: salesHistory.length, paymentMethodDistribution: Object.values(paymentMethodDistribution),
+            topSellingProducts,
+            topSellingServices
+        };
+    }, [estoque, salesHistory]);
+
+    // ===================================================================
+    // EXPORT & MISC
+    // ===================================================================
+
+    // CSV export handler
+    const handleExportCSV = () => {
+        if (sortedEstoque.length === 0) {
+            alert("Não há dados para exportar.");
+            return;
+        }
+        const csvData = sortedEstoque.map(item => ({
+            'Produto': item.nome,
+            'Marca': item.marca,
+            'Categoria': item.categoria,
+            'Fornecedor': item.fornecedor,
+            'Em Estoque': item.emEstoque,
+            'Qtda. Mínima': item.qtdaMinima,
+            'Preço': item.preco,
+            'Markup (%)': item.markup,
+            'Preço Final': item.precoFinal
+        }));
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'estoque_boycell.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const lowStockItems = useMemo(() =>
+        estoque.filter(item => Number(item.emEstoque) <= Number(item.qtdaMinima))
+        .sort((a, b) => (a.nome || '').localeCompare(b.nome || ''))
+    , [estoque]);
+
+    const handleSale = async (saleDetails) => {
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/sales`, {
+                method: 'POST',
+                // Headers are added by makeAuthRequest
+                body: JSON.stringify(saleDetails)
+            });
+    
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao finalizar a venda.');
+    
+            // Update frontend state after successful sale
+            // 1. Update sales history
+            setSalesHistory(prevHistory => [data, ...prevHistory]);
+    
+            // 2. Update stock
+            setEstoque(currentEstoque => {
+                const newEstoque = [...currentEstoque];
+                data.items.forEach(cartItem => {
+                    if (cartItem.type === 'produto') {
+                        const productIndex = newEstoque.findIndex(p => p.id === cartItem.id);
+                        if (productIndex !== -1) {
+                            const product = newEstoque[productIndex];
+                            const newStock = (Number(product.emEstoque) || 0) - cartItem.quantity;
+                            newEstoque[productIndex] = { ...product, emEstoque: newStock };
+                        }
+                    }
+                });
+                return newEstoque;
+            });
+    
+            // 3. Update clients list
+            setClientes(currentClientes => {
+                const existingClient = currentClientes.find(c => c.id === data.clienteId);
+                const clientData = { id: data.clienteId, name: data.customer, cpf: data.customerCpf, phone: data.customerPhone, email: data.customerEmail, lastPurchase: data.date };
+                if (existingClient) {
+                    return currentClientes.map(c => c.id === data.clienteId ? { ...c, ...clientData } : c);
+                } else {
+                    return [...currentClientes, clientData];
+                }
+            });
+    
+            return data; // Return the complete sale object from the backend
+        } catch (error) {
+            if (error.message === 'Unauthorized access: Token invalid or expired.') return null; // Already handled by makeAuthRequest
+            toast.error(error.message);
+            return null;
+        }
+    };
+
+    const handleAddUser = async (newUser, adminName) => {
+        try {
+            // Define as permissões padrão para um novo usuário (vendedor)
+            const userPermissions = {
+                ...newUser,
+                permissions: getDefaultPermissions('user')
+            };
+
+            const response = await makeAuthRequest(`${API_URL}/api/users/register`, {
+                method: 'POST',
+                body: JSON.stringify(userPermissions)
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao criar usuário.');
+            }
+ 
+            setUsers(prevUsers => [...prevUsers, data]);
+            logAdminActivity(adminName, 'Criação de Usuário', `Vendedor "${data.name}" (${data.email}) foi criado.`);
+            toast.success('Vendedor adicionado com sucesso!');
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleDeleteUser = async (userId, adminName, currentUser) => {
+        const userToDelete = users.find(user => user.id === userId);
+        if (!userToDelete) return;
+
+        // Frontend validation for quick feedback
+        if (userToDelete.role === 'root') {
+            toast.error('O usuário root não pode ser excluído.');
+            return;
+        }
+        if (userToDelete.role === 'admin' && currentUser.role !== 'root') {
+            toast.error('Apenas o usuário root pode excluir um administrador.');
+            return;
+        }
+
+        if (window.confirm(`Tem certeza que deseja excluir o usuário "${userToDelete.name}"?`)) {
+            try {
+                const response = await makeAuthRequest(`${API_URL}/api/users/${userId}`, {
+                    method: 'DELETE',
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erro ao excluir usuário.');
+
+                setUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
+                logAdminActivity(adminName, 'Exclusão de Usuário', `Usuário "${userToDelete.name}" (${userToDelete.email}) foi excluído.`);
+                toast.success(data.message);
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
+
+    const handleUpdateUser = async (userId, updatedData, adminName, currentUser) => {
+        try {
+            // Prepara o corpo da requisição
+            const body = { ...updatedData };
+            if (!body.password) delete body.password;
+            
+            // A API irá validar se o usuário tem permissão para alterar o role.
+            const response = await makeAuthRequest(`${API_URL}/api/users/${userId}`, { 
+                method: 'PUT',
+                body: JSON.stringify(body)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar usuário.');
+
+            setUsers(currentUsers => currentUsers.map(user => (user.id === userId ? { ...user, ...data } : user)));
+            
+            // Se o usuário que está sendo editado é o próprio usuário logado, atualiza o currentUser
+            if (currentUser && currentUser.id === userId) {
+                setCurrentUser(data);
+            }
+
+            const oldUser = users.find(u => u.id === userId);
+            const changes = [];
+            if (oldUser.name !== data.name) changes.push(`Nome alterado de "${oldUser.name}" para "${data.name}"`);
+            if (oldUser.email !== data.email) changes.push(`Email alterado de "${oldUser.email}" para "${data.email}"`);
+            if (updatedData.password) changes.push('Senha foi alterada');
+            if (currentUser.role === 'root' && JSON.stringify(oldUser.permissions) !== JSON.stringify(data.permissions)) {
+                changes.push('Permissões foram alteradas');
+            }
+            if (changes.length > 0) {
+                logAdminActivity(adminName, 'Atualização de Usuário', `Dados do usuário "${oldUser.name}" atualizados: ${changes.join('; ')}.`);
+            }
+
+            toast.success("Usuário atualizado com sucesso!");
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleUpdateCliente = async (clienteId, updatedData, adminName) => {
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/clients/${clienteId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updatedData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar cliente.');
+
+            setClientes(currentClientes =>
+                currentClientes.map(cliente => (cliente.id === clienteId ? data : cliente))
+            );
+
+            logAdminActivity(adminName, 'Atualização de Cliente', `Dados do cliente "${data.name}" foram atualizados.`);
+            toast.success("Cliente atualizado com sucesso!");
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleDeleteCliente = async (clienteId, adminName) => {
+        const clienteToDelete = clientes.find(c => c.id === clienteId);
+        if (!clienteToDelete) return;
+
+        if (window.confirm('vc perdera os dados do cliente e todo o historico pertencente a ele, será irrecuperavel!!! tem certeza?')) {
+            try {
+                const response = await makeAuthRequest(`${API_URL}/api/clients/${clienteId}`, {
+                    method: 'DELETE',
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erro ao excluir cliente.');
+
+                setClientes(currentClientes => currentClientes.filter(c => c.id !== clienteId));
+                // Também remove o histórico de vendas do cliente do estado local para atualizar os gráficos.
+                if (clienteToDelete.cpf) {
+                    setSalesHistory(currentHistory => 
+                        currentHistory.filter(sale => sale.customerCpf !== clienteToDelete.cpf)
+                    );
+                }
+                logAdminActivity(adminName, 'Exclusão de Cliente', `Cliente "${clienteToDelete.name}" (CPF: ${clienteToDelete.cpf}) foi excluído.`);
+                toast.success(data.message);
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
+
+    const handleBackup = () => {
+        try {
+            const backupData = {
+                estoque,
+                servicos,
+                users,
+                salesHistory,
+                clientes,
+                activityLog,
+                stockValueHistory: JSON.parse(localStorage.getItem('boycell-stockValueHistory') || '[]'),
+                columns: JSON.parse(localStorage.getItem('boycell-columns') || 'null'),
+                servicosColumns: JSON.parse(localStorage.getItem('boycell-servicos-columns') || 'null'),
+                chartsConfig: JSON.parse(localStorage.getItem('boycell-chartsConfig') || 'null'),
+            };
+
+            const jsonString = JSON.stringify(backupData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const date = new Date().toISOString().split('T')[0];
+            link.href = url;
+            link.download = `backup-boycell-${date}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            toast.success('Backup realizado com sucesso!');
+        } catch (error) {
+            console.error("Erro ao criar backup:", error);
+            toast.error('Ocorreu um erro ao criar o backup.');
+        }
+    };
+
+    const handleRestore = (fileContent) => {
+        try {
+            const restoredData = JSON.parse(fileContent);
+            
+            // AVISO: Esta é uma restauração local e não afeta o banco de dados.
+            // Uma restauração completa exigiria endpoints de API para cada tipo de dado.
+            Object.keys(restoredData).forEach(key => {
+                localStorage.setItem(`boycell-${key}`, JSON.stringify(restoredData[key]));
+            });
+
+            toast.success('Dados restaurados localmente! A aplicação será recarregada.');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } catch (error) {
+            console.error("Erro ao restaurar backup:", error);
+            toast.error('Arquivo de backup inválido ou corrompido.');
+        }
+    };
+
+    const handleResetUserPassword = async (userId, adminName, currentUser) => {
+        const userToReset = users.find(user => user.id === userId);
+        if (!userToReset) {
+            toast.error('Usuário não encontrado.');
+            return;
+        }
+
+        // Validações no frontend para feedback rápido
+        if (userToReset.role === 'root') {
+            toast.error('Não é possível resetar a senha do usuário root.');
+            return;
+        }
+        if (userToReset.role === 'admin' && currentUser.role !== 'root') {
+            toast.error('Apenas o usuário root pode resetar a senha de um administrador.');
+            return;
+        }
+
+        if (window.confirm(`Tem certeza que deseja resetar a senha de "${userToReset.name}"? Uma nova senha será gerada.`)) {
+            try {
+                const response = await makeAuthRequest(`${API_URL}/api/users/${userId}/reset-password`, {
+                    method: 'POST',
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Erro ao resetar senha.');
+
+                const { newPassword } = data;
+                logAdminActivity(adminName, 'Reset de Senha', `A senha do usuário "${userToReset.name}" foi resetada.`);
+                toast.success(`Senha de ${userToReset.name} resetada para: "${newPassword}"`, {
+                    duration: 10000,
+                });
+            } catch (error) {
+                toast.error(error.message);
+            }
+        }
+    };
+
+    const handlePasswordRecovery = async (email, name) => {
+        try {
+            const response = await fetch(`${API_URL}/api/auth/recover`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, name })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao solicitar recuperação.');
+
+            toast.success(data.message);
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleAddBanner = async (newBannerData, adminName) => {
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/banners`, {
+                method: 'POST',
+                body: JSON.stringify(newBannerData)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao adicionar banner.');
+            setBanners(prev => [...prev, data].sort((a, b) => a.sort_order - b.sort_order));
+            logAdminActivity(adminName, 'Criação de Banner', `Banner "${data.title || 'Novo'}" foi criado.`);
+            toast.success('Banner adicionado com sucesso!');
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleUpdateBanner = async (bannerId, bannerData, adminName) => {
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/banners/${bannerId}`, {
+                method: 'PUT',
+                body: JSON.stringify(bannerData)
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar banner.');
+            setBanners(prev => prev.map(b => b.id === bannerId ? data : b).sort((a, b) => a.sort_order - b.sort_order));
+            logAdminActivity(adminName, 'Atualização de Banner', `Banner "${data.title || 'ID: '+bannerId}" foi atualizado.`);
+            toast.success('Banner atualizado com sucesso!');
+            return true;
+        } catch (error) {
+            toast.error(error.message);
+            return false;
+        }
+    };
+
+    const handleDeleteBanner = async (bannerId, adminName) => {
+        if (!window.confirm('Tem certeza que deseja excluir este banner?')) return;
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/banners/${bannerId}`, {
+                method: 'DELETE',
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Erro ao excluir banner.');
+            setBanners(prev => prev.filter(b => b.id !== bannerId));
+            logAdminActivity(adminName, 'Exclusão de Banner', `Banner com ID ${bannerId} foi excluído.`);
+            toast.success(data.message);
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
+
+    const hasAdminAccessPermission = useMemo(() => {
+        if (!currentUser) return false;
+        // Root e Admin sempre têm acesso
+        if (currentUser.role === 'root' || currentUser.role === 'admin') return true;
+        if (!currentUser.permissions) return false;
+
+        // Lista de permissões que garantem acesso ao painel de administração para um 'user'
+        const adminAccessPermissions = [
+            ...Object.keys(PERMISSION_GROUPS.admin.permissions),
+            ...Object.keys(PERMISSION_GROUPS.root.permissions),
+            ...Object.keys(PERMISSION_GROUPS.siteContent.permissions),
+        ];
+
+        // Verifica se o usuário tem pelo menos uma dessas permissões
+        return adminAccessPermissions.some(permissionKey => 
+            !!currentUser.permissions[permissionKey]
+        );
+    }, [currentUser]);
+
+    return {
+        estoque,
+        servicos,
+        // Products
+        paginatedEstoque,
+        dashboardData,
+        sortConfig,
+        handleSort,
+        handleExcluirProduto,
+        searchTerm,
+        setSearchTerm,
+        showLowStockOnly,
+        setShowLowStockOnly,
+        currentPage,
+        setCurrentPage,
+        totalPages,
+        isAddModalOpen,
+        handleOpenAddModal,
+        handleCloseAddModal,
+        newProduct,
+        handleInputChange,
+        handleAddProduct,
+        isEditModalOpen,
+        handleOpenEditModal,
+        handleCloseEditModal,
+        editingProduct,
+        handleEditInputChange,
+        handleUpdateProduct,
+        handleExportCSV,
+        lowStockItems,
+        stockValueHistory,
+        // Services
+        paginatedServicos,
+        servicoSortConfig,
+        handleServicoSort,
+        handleExcluirServico,
+        servicoSearchTerm,
+        setServicoSearchTerm,
+        servicoCurrentPage,
+        setServicoCurrentPage,
+        totalServicoPages,
+        isAddServicoModalOpen,
+        handleOpenAddServicoModal,
+        handleCloseAddServicoModal,
+        newServico,
+        isEditServicoModalOpen,
+        handleOpenEditServicoModal,
+        handleCloseEditServicoModal,
+        editingServico,
+        handleServicoInputChange,
+        handleAddServico,
+        handleUpdateServico,
+        handleSale,
+        salesHistory,
+        // Users
+        users,
+        handleAddUser,
+        handleDeleteUser,
+        handleUpdateUser,
+        handleResetUserPassword,
+        handlePasswordRecovery,
+        // Clientes
+        clientes,
+        handleUpdateCliente,
+        handleDeleteCliente,
+        activityLog,
+        handleBackup,
+        handleRestore,
+        // Banners
+        isSubmitting,
+        banners,
+        handleAddBanner,
+        handleUpdateBanner,
+        handleDeleteBanner,
+        hasAdminAccessPermission, // Exporta a nova função
+    };
+};
