@@ -13,7 +13,16 @@ import RelatorioVendasUsuario from './components/RelatorioVendasUsuario.jsx';
 import DreReport from './components/DreReport.jsx';
 import { PERMISSION_GROUPS, getDefaultPermissions } from './components/useEstoque.jsx';
 
-// Dashboard components can be moved to their own file later
+/**
+ * DashboardCard Component
+ * A reusable card component for displaying key metrics on a dashboard.
+ * @param {object} props - The component props.
+ * @param {React.ElementType} props.icon - The icon component to display.
+ * @param {string} props.title - The title of the metric.
+ * @param {string|number} props.value - The value of the metric.
+ * @param {string} props.colorClass - The Tailwind CSS class for the border color.
+ * @param {boolean} [props.isToggleable=false] - Whether the value can be toggled for visibility.
+ */
 const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue, onToggle }) => {
   const Icon = icon;
   return (
@@ -34,6 +43,16 @@ const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue
   );
 };
 
+/**
+ * ChartContainer Component
+ * A draggable and collapsible container for displaying charts.
+ * @param {object} props - The component props.
+ * @param {string} props.title - The title of the chart.
+ * @param {boolean} props.show - Whether the chart content is visible.
+ * @param {function} props.onToggle - Function to toggle the chart's visibility.
+ * @param {React.ReactNode} props.children - The chart component itself.
+ * @param {function} props.onDragStart - Drag and drop handler.
+ */
 const ChartContainer = ({ title, show, onToggle, children, onDragStart, onDragEnter, onDragEnd }) => (
   <div 
     className="bg-gray-100 dark:bg-gray-800/50 p-6 rounded-xl flex flex-col transition-shadow duration-300 shadow-lg hover:shadow-red-500/20"
@@ -56,12 +75,32 @@ const ChartContainer = ({ title, show, onToggle, children, onDragStart, onDragEn
   </div>
 );
 
+// Colors for the Pie charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#d0ed57', '#ffc658'];
 
+/**
+ * AdminPage Component
+ * 
+ * This is the main administrative dashboard of the application. It provides a centralized
+ * interface for users with appropriate permissions to manage various aspects of the system,
+ * including:
+ * - User management (add, edit, delete, reset password)
+ * - Site content (banners)
+ * - System reports (sales history, user sales, DRE)
+ * - Data visualization (charts dashboard)
+ * - System operations (backup, restore, theme switching)
+ * 
+ * It heavily relies on the `useEstoqueContext` for data and action handlers.
+ * 
+ * @param {object} props - The component props.
+ * @param {function} props.onLogout - Function to handle user logout.
+ * @param {object} props.currentUser - The currently logged-in user object, containing details and permissions.
+ */
 const AdminPage = ({ onLogout, currentUser }) => {
 
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
+    // Destructure all necessary data and functions from the context
     const {
         dashboardData,
         salesHistory,
@@ -80,8 +119,10 @@ const AdminPage = ({ onLogout, currentUser }) => {
         handleDeleteBanner,
     } = useEstoqueContext();
     const hasStockPermission = useMemo(() => currentUser?.permissions?.editProduct || currentUser?.permissions?.addProduct || currentUser?.permissions?.deleteProduct || ['admin', 'root', 'vendedor'].includes(currentUser.role), [currentUser]);
-
-    // State and handlers that were in StockControl.jsx
+ 
+    // --- State Management ---
+ 
+    // Modal visibility states
     const [isUserManagementModalOpen, setIsUserManagementModalOpen] = useState(false);
     const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
     const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
@@ -91,32 +132,48 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const [isDreModalOpen, setIsDreModalOpen] = useState(false);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const [isChartsModalOpen, setIsChartsModalOpen] = useState(false);
+ 
+    // Form data states
     const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor', permissions: {} });
     const [editingUser, setEditingUser] = useState(null);
+ 
+    // Report and data states
     const [reprintingSale, setReprintingSale] = useState(null);
     const [monthlySalesReport, setMonthlySalesReport] = useState(null);
     const [logActionFilter, setLogActionFilter] = useState('');
     const [logAdminFilter, setLogAdminFilter] = useState('');
     const [showTotalValue, setShowTotalValue] = useState(false);
     const [renderCharts, setRenderCharts] = useState(false);
+ 
+    // Sales History Modal States
     const [salesHistoryStartDate, setSalesHistoryStartDate] = useState('');
     const [salesHistoryCurrentPage, setSalesHistoryCurrentPage] = useState(1);
     const salesHistoryItemsPerPage = 4;
     const [salesHistorySearchTerm, setSalesHistorySearchTerm] = useState('');
     const [salesHistoryEndDate, setSalesHistoryEndDate] = useState('');
+ 
+    // Charts Modal States
     const [salesChartPeriod, setSalesChartPeriod] = useState('day');
+ 
+    // User Sales Report Modal States
     const [userSalesReportData, setUserSalesReportData] = useState(null);
     const [userSalesReportUserId, setUserSalesReportUserId] = useState('');
     const [userSalesReportStartDate, setUserSalesReportStartDate] = useState('');
     const [userSalesReportEndDate, setUserSalesReportEndDate] = useState('');
     const [loadingUserSalesReport, setLoadingUserSalesReport] = useState(false);
+ 
+    // DRE Report Modal States
     const restoreInputRef = useRef(null);
     const [dreStartDate, setDreStartDate] = useState('');
     const [dreEndDate, setDreEndDate] = useState('');
     const [dreData, setDreData] = useState(null);
     const [loadingDre, setLoadingDre] = useState(false);
+ 
+    // Monthly Report States
     const [reportMonth, setReportMonth] = useState(new Date().getMonth());
     const [reportYear, setReportYear] = useState(new Date().getFullYear());
+ 
+    // Drag-and-drop state for charts
     const chartDragItem = useRef(null);
     const chartDragOverItem = useRef(null);
 
@@ -134,6 +191,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         { id: 'payment', title: 'Formas de Pagamento (Vendas)', visible: true, width: 'half' },
     ];
 
+    // State for chart configuration, persisted in localStorage
     const [chartsConfig, setChartsConfig] = useState(() => {
         try {
             const savedConfig = localStorage.getItem('boycell-chartsConfig');
@@ -151,6 +209,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         return initialChartsConfig;
     });
 
+    // Effect to save chart configuration to localStorage whenever it changes
     useEffect(() => {
         try {
             localStorage.setItem('boycell-chartsConfig', JSON.stringify(chartsConfig));
@@ -159,6 +218,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }
     }, [chartsConfig]);
 
+    // Effect to clean up print-specific classes from the body after printing
     useEffect(() => {
         const afterPrint = () => {
             document.body.classList.remove('print-mode-thermal');
@@ -173,6 +233,11 @@ const AdminPage = ({ onLogout, currentUser }) => {
         return () => window.removeEventListener('afterprint', afterPrint);
     }, []);
 
+    /**
+     * Checks if the current user has permission to manage a target user.
+     * @param {object} targetUser - The user object to be managed.
+     * @returns {boolean} - True if the current user can manage the target user.
+     */
     const canManageUser = (targetUser) => {
         if (!currentUser || !targetUser || !currentUser.permissions?.manageUsers) return false;
         // Ninguém pode gerenciar o usuário root.
@@ -183,6 +248,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         return true;
     };
 
+    // --- Modal Handlers ---
     const handleOpenUserManagementModal = () => setIsUserManagementModalOpen(true);
     const handleCloseUserManagementModal = () => setIsUserManagementModalOpen(false);
     const handleOpenAddUserModal = () => setIsAddUserModalOpen(true);
@@ -190,10 +256,16 @@ const AdminPage = ({ onLogout, currentUser }) => {
         setIsAddUserModalOpen(false);
         setNewUserData({ name: '', email: '', password: '', title: 'Vendedor', permissions: {} });
     };
+
+    // --- Form and Action Handlers ---
     const handleNewUserChange = (e) => {
         const { name, value } = e.target;
         setNewUserData(prev => ({ ...prev, [name]: value }));
     };
+    /**
+     * Handles the submission of the "Add New User" form.
+     * @param {React.FormEvent} e - The form event.
+     */
     const handleAddNewUser = async (e) => {
         e.preventDefault();
         if (!newUserData.name || !newUserData.email || !newUserData.password || !newUserData.title) {
@@ -217,6 +289,10 @@ const AdminPage = ({ onLogout, currentUser }) => {
         const { name, value } = e.target;
         setEditingUser(prev => ({ ...prev, [name]: value }));
     };
+    /**
+     * Handles the submission of the "Edit User" form.
+     * @param {React.FormEvent} e - The form event.
+     */
     const handleUpdateUserSubmit = async (e) => {
         e.preventDefault();
         if (!editingUser || !editingUser.name || !editingUser.email) {
@@ -244,10 +320,17 @@ const AdminPage = ({ onLogout, currentUser }) => {
         setIsChartsModalOpen(false);
     };
 
+    /**
+     * Triggers the file input for restoring a backup.
+     */
     const handleRestoreClick = () => {
         restoreInputRef.current.click();
     };
 
+    /**
+     * Handles the file selection for backup restoration. This is a local-only restore.
+     * @param {React.ChangeEvent<HTMLInputElement>} event - The file input change event.
+     */
     const handleFileRestore = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -282,6 +365,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         reader.readAsText(file);
     };
 
+    // --- Chart Drag-and-Drop Handlers ---
     const handleChartDragStart = (e, index) => {
         chartDragItem.current = index;
         e.currentTarget.style.opacity = '0.5';
@@ -302,6 +386,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         setChartsConfig(prevConfig => prevConfig.map(chart => chart.id === id ? { ...chart, visible: !chart.visible } : chart));
     };
 
+    /**
+     * Generates and triggers the print view for the monthly sales report.
+     */
     const handlePrintMonthlyReport = () => {
         const selectedDate = new Date(reportYear, reportMonth, 1);
         const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -345,6 +432,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }, 100);
     };
 
+    /**
+     * Fetches and generates the sales report for a specific user within a date range.
+     */
     const handleGenerateUserSalesReport = async () => {
         if (!userSalesReportUserId || !userSalesReportStartDate || !userSalesReportEndDate) {
             toast.error('Por favor, selecione o vendedor e o período.');
@@ -387,6 +477,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }
     };
 
+    /**
+     * Triggers the print view for the user sales report.
+     */
     const handlePrintUserSalesReport = () => {
         if (!userSalesReportData) {
             toast.error("Gere um relatório antes de imprimir.");
@@ -398,6 +491,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }, 100);
     };
 
+    /**
+     * Fetches and generates the simplified DRE (Demonstrativo de Resultado do Exercício) report.
+     */
     const handleGenerateDreReport = async () => {
         if (!dreStartDate || !dreEndDate) {
             toast.error('Por favor, selecione as datas de início e fim.');
@@ -423,6 +519,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }
     };
 
+    /**
+     * Triggers the print view for the DRE report.
+     */
     const handlePrintDre = () => {
         if (!dreData) {
             toast.error("Gere um relatório antes de imprimir.");
@@ -434,6 +533,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         }, 100);
     };
 
+    // --- Receipt Reprint Handlers ---
     const handleOpenReprintModal = (sale) => setReprintingSale(sale);
     const handleCloseReprintModal = () => setReprintingSale(null);
 
@@ -447,6 +547,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
         window.print();
     };
 
+    /**
+     * Generates a pre-filled WhatsApp message with the sale receipt details.
+     */
     const handleWhatsAppRecibo = () => {
         if (!reprintingSale) return;
         const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerPhone, receiptCode } = reprintingSale;
@@ -467,16 +570,21 @@ const AdminPage = ({ onLogout, currentUser }) => {
         window.open(`https://wa.me/${sanitizedPhone}?text=${encodeURIComponent(whatsAppText)}`, '_blank');
     };
 
+    // --- Memoized Calculations for Filtering and Sorting ---
+
+    // Memoized list of unique log actions for filtering
     const logActions = useMemo(() => {
         if (!activityLog) return [];
         return [...new Set(activityLog.map(log => log.action))].sort();
     }, [activityLog]);
 
+    // Memoized list of unique admin names from logs for filtering
     const logAdmins = useMemo(() => {
         if (!activityLog) return [];
         return [...new Set(activityLog.map(log => log.admin))].sort();
     }, [activityLog]);
 
+    // Memoized filtered activity log based on selected filters
     const filteredActivityLog = useMemo(() => {
         if (!activityLog) return [];
         return activityLog.filter(log => {
@@ -486,6 +594,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         });
     }, [activityLog, logActionFilter, logAdminFilter]);
 
+    // Memoized filtered sales history based on date range and search term
     const filteredSalesHistory = useMemo(() => {
         if (!Array.isArray(salesHistory)) return [];
         const lowerCaseSearchTerm = salesHistorySearchTerm.toLowerCase();
@@ -519,12 +628,14 @@ const AdminPage = ({ onLogout, currentUser }) => {
         });
     }, [salesHistory, salesHistoryStartDate, salesHistoryEndDate, salesHistorySearchTerm]);
 
+    // Effect to reset pagination when filters change
     useEffect(() => {
         setSalesHistoryCurrentPage(1);
     }, [salesHistoryStartDate, salesHistoryEndDate, salesHistorySearchTerm]);
 
     const salesHistoryTotalPages = Math.ceil(filteredSalesHistory.length / salesHistoryItemsPerPage);
 
+    // Memoized paginated sales history for display
     const paginatedSalesHistory = useMemo(() => {
         if (filteredSalesHistory.length === 0) return [];
         const startIndex = (salesHistoryCurrentPage - 1) * salesHistoryItemsPerPage;
@@ -532,6 +643,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     }, [filteredSalesHistory, salesHistoryCurrentPage]);
 
 
+    // Memoized sales data grouped by period (day, week, month) for charting
     const salesByPeriodData = useMemo(() => {
         if (!salesHistory || salesHistory.length === 0) return [];
         const getWeekStartDate = (d) => {
@@ -558,6 +670,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
         return Object.values(groupedData).sort((a, b) => new Date(a.period) - new Date(b.period));
     }, [salesHistory, salesChartPeriod]);
 
+    // Common classes for action buttons in management panels
     const actionButtonClasses = "w-full inline-flex items-center justify-start gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors duration-300 text-sm";
  
     return (
@@ -577,6 +690,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 <DreReport reportData={dreData} />
             </div>
  
+            {/* Header */}
             <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
                 <nav className="container mx-auto flex items-center justify-between p-4">
                     <h1 className="text-xl lg:text-2xl font-bold tracking-wider text-white">Olá, {currentUser?.name?.split(' ')[0] || 'Admin'}!</h1>
@@ -595,6 +709,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 </nav>
             </header>
 
+            {/* Main Content Area */}
             <main id="admin-non-printable-area" className="container mx-auto px-4 py-8 md:py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Painel de Administração */}
@@ -619,6 +734,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         </div>
                     </div>
 
+                    {/* Painel de Conteúdo do Site */}
                     {currentUser?.permissions?.manageBanners && (
                         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
                             <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Conteúdo do Site</h3>
@@ -630,6 +746,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         </div>
                     )}
 
+                    {/* Painel de Relatórios e Dados */}
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
                         <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Relatórios e Dados</h3>
                         <div className="flex flex-col gap-3">
@@ -661,6 +778,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         </div>
                     </div>
 
+                    {/* Painel de Sistema */}
                     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-2 lg:col-span-1">
                         <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Sistema</h3>
                         <div className="flex flex-col gap-3">
@@ -684,7 +802,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 </div>
             </main>
 
-            {/* MODALS */}
+            {/* --- Modals --- */}
             <Modal isOpen={isBannerModalOpen} onClose={() => setIsBannerModalOpen(false)} size="2xl">
                 <BannerManager 
                     banners={banners}
@@ -695,6 +813,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 />
             </Modal>
 
+            {/* Modal: Relatório de Vendas por Vendedor */}
             <Modal isOpen={isUserSalesReportModalOpen} onClose={() => setIsUserSalesReportModalOpen(false)} size="xl">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Relatório de Vendas por Vendedor</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
@@ -743,6 +862,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 <div className="bg-white rounded-lg overflow-y-auto max-h-[60vh]"><RelatorioVendasUsuario reportData={userSalesReportData} /></div>
             </Modal>
 
+            {/* Modal: DRE Simplificado */}
             <Modal isOpen={isDreModalOpen} onClose={() => setIsDreModalOpen(false)} size="xl">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">DRE Simplificado</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
@@ -783,6 +903,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 </div>
             </Modal>
 
+            {/* Modal: Gerenciar Usuários */}
             <Modal isOpen={isUserManagementModalOpen} onClose={handleCloseUserManagementModal} size="lg">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Gerenciar Usuários</h2>
                 <div>
@@ -818,6 +939,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 </div>
             </Modal>
 
+            {/* Modal: Editar Usuário */}
             <Modal isOpen={isEditUserModalOpen} onClose={handleCloseEditUserModal} size="xl">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Usuário</h2>
                 {editingUser && (
@@ -889,6 +1011,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 )}
             </Modal>
 
+            {/* Modal: Adicionar Novo Usuário */}
             <Modal isOpen={isAddUserModalOpen} onClose={handleCloseAddUserModal}>
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Adicionar Novo Usuário</h2>
                 <form className="space-y-4" onSubmit={handleAddNewUser}>
@@ -914,45 +1037,13 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             placeholder="Ex: Vendedor, Gerente" />
                     </div>
-                    {/* Seção de Permissões para Adicionar Usuário */}
-                    <div className="mt-4 md:col-span-2">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Permissões</h4>
-                        <div className="space-y-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg max-h-80 overflow-y-auto">
-                            {Object.values(PERMISSION_GROUPS).map((group, groupIndex) => (
-                                <div key={group.title}>
-                                    <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{group.title}</h5>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                                        {Object.entries(group.permissions).map(([key, { label }]) => (
-                                            <label key={key} className="flex items-center gap-2 cursor-pointer">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!newUserData.permissions?.[key]}
-                                                    onChange={(e) => {
-                                                        const { checked } = e.target;
-                                                        setNewUserData(prev => ({
-                                                            ...prev,
-                                                            permissions: { ...(prev.permissions || {}), [key]: checked }
-                                                        }));
-                                                    }}
-                                                    className="form-checkbox h-4 w-4 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500"
-                                                />
-                                                <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                    {groupIndex < Object.values(PERMISSION_GROUPS).length - 1 && (
-                                        <hr className="border-gray-300 dark:border-gray-700 mt-4" />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                     <button type="submit" className="w-full mt-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                         Adicionar Usuário
                     </button>
                 </form>
             </Modal>
 
+            {/* Modal: Log de Atividades */}
             <Modal isOpen={isActivityLogModalOpen} onClose={() => setIsActivityLogModalOpen(false)} size="2xl">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Log de Atividades</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
@@ -1010,6 +1101,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 </div>
             </Modal>
 
+            {/* Modal: Histórico de Vendas */}
             <Modal isOpen={isSalesHistoryModalOpen} onClose={handleCloseSalesHistoryModal} size="md">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Histórico de Vendas</h2>
                 <div className="space-y-6">
@@ -1108,6 +1200,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 )}
             </Modal>
 
+            {/* Modal: Análise Gráfica (Charts) */}
             <Modal isOpen={isChartsModalOpen} onClose={handleCloseChartsModal} size="2xl">
                 <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Análise Gráfica</h2>
                 {renderCharts ? (
@@ -1192,6 +1285,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 )}
             </Modal>
 
+            {/* Modal: Reimpressão de Recibo */}
             <Modal isOpen={reprintingSale !== null} onClose={handleCloseReprintModal}>
                 {reprintingSale && (
                     <>

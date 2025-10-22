@@ -1111,13 +1111,19 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 return false;
             }
 
+            // Define as permissões padrão para um novo usuário (vendedor)
+            const userPermissions = {
+                ...newUser,
+                permissions: getDefaultPermissions('user')
+            };
+
             const response = await fetch(`${API_URL}/api/users/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(newUser)
+                body: JSON.stringify(userPermissions)
         }); 
 
             const data = await response.json();
