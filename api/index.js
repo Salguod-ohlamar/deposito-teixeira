@@ -570,12 +570,15 @@ app.post('/api/auth/recover', async (req, res) => {
 
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, hasPermission('manageUsers'), async (req, res) => {
-  const { name, email, password, title, permissions } = req.body;
-  // O cargo 'role' é definido como 'user' por padrão, mas as permissões são customizadas.
-  const finalRole = 'user'; 
+  const { name, email, password, title, permissions, role } = req.body;
+  const requestingUser = req.user;
+
+  // Apenas o root pode definir o cargo. Se não for o root, o cargo é 'user' por padrão.
+  // As permissões são sempre customizadas a partir do frontend.
+  const finalRole = (requestingUser.role === 'root' && role) ? role : 'user';
 
   // Validação dos campos
-  if (!name || !email || !password || !title || !permissions) {
+  if (!name || !email || !password || !title || !permissions || !finalRole) {
     return res.status(400).json({ message: 'Nome, email, senha e título do cargo são obrigatórios.' });
   }
 
@@ -670,8 +673,9 @@ app.put('/api/users/:id', protect, hasPermission('manageUsers'), async (req, res
         if (targetUser.role === 'root') return res.status(403).json({ message: 'O usuário root não pode ser editado.' });
         
         // Um usuário 'user' não pode editar outro 'user'. Apenas o 'root' pode.
-        if (requestingUser.role === 'user' && targetUser.role === 'user' && requestingUser.id !== targetUser.id) {
-            return res.status(403).json({ message: 'Você não tem permissão para editar outros usuários.' });
+        // Apenas o root pode editar um admin.
+        if (targetUser.role === 'admin' && requestingUser.role !== 'root') {
+            return res.status(403).json({ message: 'Apenas o usuário root pode editar um administrador.' });
         }
 
         // Check for email collision
