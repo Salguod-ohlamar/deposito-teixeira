@@ -172,7 +172,10 @@ const HomePage = ({ onLoginClick }) => {
     };
 
     const handleCategoryClick = (categoryName) => {
-        const productsInCategory = allProducts.filter(p => p.categoria === categoryName);
+        // Filtra para mostrar apenas os produtos da categoria que estão marcados como destaque.
+        const productsInCategory = allProducts.filter(p => 
+            p.categoria === categoryName && p.destaque === true
+        );
         setProductsForModal(productsInCategory);
         setViewingCategory(categoryName);
         setIsCategoryModalOpen(true);
