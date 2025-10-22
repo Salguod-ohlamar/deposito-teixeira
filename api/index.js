@@ -570,11 +570,12 @@ app.post('/api/auth/recover', async (req, res) => {
 
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, hasPermission('manageUsers'), async (req, res) => {
-  const { name, email, password, title } = req.body;
-  const finalRole = 'user'; // Todos os novos usuários são 'user'
+  const { name, email, password, title, permissions } = req.body;
+  // O cargo 'role' é definido como 'user' por padrão, mas as permissões são customizadas.
+  const finalRole = 'user'; 
 
   // Validação dos campos
-  if (!name || !email || !password || !title) {
+  if (!name || !email || !password || !title || !permissions) {
     return res.status(400).json({ message: 'Nome, email, senha e título do cargo são obrigatórios.' });
   }
 
@@ -590,7 +591,7 @@ app.post('/api/users/register', protect, hasPermission('manageUsers'), async (re
 
     const { rows } = await db.query(
       'INSERT INTO users (name, email, password_hash, role, permissions, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, email, role, permissions, title',
-      [name, email.toLowerCase(), password_hash, finalRole, JSON.stringify(getDefaultPermissions(finalRole)), title]
+      [name, email.toLowerCase(), password_hash, finalRole, JSON.stringify(permissions), title]
     );
 
     res.status(201).json(rows[0]);

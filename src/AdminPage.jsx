@@ -90,8 +90,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const [isUserSalesReportModalOpen, setIsUserSalesReportModalOpen] = useState(false);
     const [isDreModalOpen, setIsDreModalOpen] = useState(false);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+    const [isBannerModalOpen, setIsBannerModalOpen] = useState(false); 
     const [isChartsModalOpen, setIsChartsModalOpen] = useState(false);
-    const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor' });
+    const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor', role: 'user', permissions: getDefaultPermissions('user') });
     const [editingUser, setEditingUser] = useState(null);
     const [reprintingSale, setReprintingSale] = useState(null);
     const [monthlySalesReport, setMonthlySalesReport] = useState(null);
@@ -188,7 +189,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const handleOpenAddUserModal = () => setIsAddUserModalOpen(true);
     const handleCloseAddUserModal = () => {
         setIsAddUserModalOpen(false);
-        setNewUserData({ name: '', email: '', password: '', title: 'Vendedor' });
+        setNewUserData({ name: '', email: '', password: '', title: 'Vendedor', role: 'user', permissions: getDefaultPermissions('user') });
     };
     const handleNewUserChange = (e) => {
         const { name, value } = e.target;
@@ -196,6 +197,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
     };
     const handleAddNewUser = async (e) => {
         e.preventDefault();
+        // A verificação de 'role' não é mais necessária aqui, pois as permissões são enviadas diretamente.
         if (!newUserData.name || !newUserData.email || !newUserData.password || !newUserData.title) {
             toast.error('Por favor, preencha todos os campos: Nome, Email, Senha e Título.');
             return;
@@ -918,6 +920,39 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             placeholder="Ex: Vendedor, Gerente" />
                     </div>
+                {/* Seção de Permissões para Adicionar Usuário */}
+                <div className="mt-4 md:col-span-2">
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Permissões</h4>
+                    <div className="space-y-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg max-h-80 overflow-y-auto">
+                        {Object.values(PERMISSION_GROUPS).map((group, groupIndex) => (
+                            <div key={group.title}>
+                                <h5 className="text-md font-semibold text-gray-900 dark:text-white mb-3">{group.title}</h5>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+                                    {Object.entries(group.permissions).map(([key, { label }]) => (
+                                        <label key={key} className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!newUserData.permissions?.[key]}
+                                                onChange={(e) => {
+                                                    const { checked } = e.target;
+                                                    setNewUserData(prev => ({
+                                                        ...prev,
+                                                        permissions: { ...(prev.permissions || {}), [key]: checked }
+                                                    }));
+                                                }}
+                                                className="form-checkbox h-4 w-4 text-purple-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-purple-500"
+                                            />
+                                            <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                                {groupIndex < Object.values(PERMISSION_GROUPS).length - 1 && (
+                                    <hr className="border-gray-300 dark:border-gray-700 mt-4" />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
                     <button type="submit" className="w-full mt-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
                         Adicionar Usuário
                     </button>
