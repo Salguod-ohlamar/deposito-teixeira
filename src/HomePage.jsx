@@ -297,7 +297,12 @@ const HomePage = ({ onLoginClick }) => {
                             {productsForModal.map(product => (
                                 <ProductCard 
                                     key={product.id} 
-                                    product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} 
+                                    product={{
+                                        ...product,
+                                        name: product.nome,
+                                        price: product.precoFinal,
+                                        description: `Marca: ${product.marca}`
+                                    }} 
                                     onComprarClick={handleComprarClick} 
                                 />
                             ))}
