@@ -66,7 +66,7 @@ export const PERMISSION_GROUPS = {
     root: {
         title: 'Super Admin (Root)',
         permissions: {
-            manageUsers: { label: 'Gerenciar Usuários', roles: ['root'] },
+            manageUsers: { label: 'Gerenciar Usuários', roles: ['root', 'admin'] },
             resetUserPassword: { label: 'Resetar Senha', roles: ['root'] },
             manageBackup: { label: 'Gerenciar Backup/Restore', roles: ['root'] },
             manageTheme: { label: 'Alterar Tema do Site', roles: ['root'] },
