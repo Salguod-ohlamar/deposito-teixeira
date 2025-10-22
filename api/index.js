@@ -150,6 +150,7 @@ app.put('/api/services/:id', protect, hasPermission('editService'), async (req, 
         servico, fornecedor, marca, tipoReparo, tecnico, is_offer,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
+    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup);
 
     try {
         const query = `
@@ -162,7 +163,7 @@ app.put('/api/services/:id', protect, hasPermission('editService'), async (req, 
         `;
         const values = [
             servico, fornecedor, marca, tipoReparo, tecnico,
-            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
             JSON.stringify(historico), !!is_offer,
             id,
         ];
@@ -417,6 +418,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
         nome, categoria, marca, fornecedor, emEstoque, em_estoque, qtdaMinima, is_offer,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
+    const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(parseFloat(markup));
 
     try {
         const query = `
@@ -429,7 +431,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
         `;
         const values = [
             nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
-            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
             JSON.stringify(historico), !!is_offer,
             id
         ];
