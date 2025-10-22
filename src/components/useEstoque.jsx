@@ -1,6 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import Papa from 'papaparse';
-import toast from 'react-hot-toast';
 import imageCompression from 'browser-image-compression';
 
 import { parsePrice } from './formatters.js';
@@ -90,6 +88,31 @@ export const getDefaultPermissions = (role) => {
 
 const itemsPerPage = 5; // Itens por página
 
+const validateCPF = (cpf) => {
+    if (typeof cpf !== 'string') return false;
+    // Allow CNPJ format as well, basic validation for length
+    const cleaned = cpf.replace(/[^\d]+/g, '');
+    if (cleaned.length === 14) return true; // Basic CNPJ validation
+
+    if (cleaned.length !== 11 || !!cleaned.match(/(\d)\1{10}/)) return false;
+    
+    const digits = cleaned.split('').map(el => +el);
+    
+    const rest = (count) => (
+        (digits.slice(0, count-12)
+            .reduce((soma, el, index) => (soma + el * (count - index)), 0) * 10) % 11
+    ) % 10;
+
+    return rest(10) === digits[9] && rest(11) === digits[10];
+};
+
+const validatePhone = (phone) => {
+    if (typeof phone !== 'string') return false;
+    const cleaned = phone.replace(/\D/g, '');
+    // Basic validation for Brazilian mobile numbers (DDD + 9 + 8 digits) or landlines (DDD + 8 digits)
+    return cleaned.length === 11 || cleaned.length === 10;
+};
+
 export const useEstoque = (currentUser, setCurrentUser) => {
     // ===================================================================
     // PRODUCTS STATE
@@ -101,7 +124,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     // Helper to handle 401 responses and force logout
     const handleUnauthorized = () => {
-        toast.error('Sessão expirada ou não autorizada. Por favor, faça login novamente.');
+        // toast.error('Sessão expirada ou não autorizada. Por favor, faça login novamente.');
         setCurrentUser(null); // Clear current user state
         localStorage.removeItem('boycell-token'); // Clear token
         // The ProtectedRoute in App.jsx will handle the redirection to login.
@@ -155,8 +178,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 }));
                 setEstoque(parsedData);
             } catch (error) {
-                console.error("Erro ao buscar produtos da API:", error);
-                console.log('Info: Não foi possível carregar os produtos. Isso pode ocorrer se não houver produtos cadastrados ou por um erro de conexão.');
+                // console.error("Erro ao buscar produtos da API:", error);
+                // console.log('Info: Não foi possível carregar os produtos. Isso pode ocorrer se não houver produtos cadastrados ou por um erro de conexão.');
             } finally {
                 setLoadingEstoque(false);
             }
@@ -172,7 +195,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             const savedHistory = localStorage.getItem('boycell-stockValueHistory');
             return savedHistory ? JSON.parse(savedHistory) : [];
         } catch (error) {
-            console.error("Erro ao carregar o histórico de valor do localStorage:", error);
+            // console.error("Erro ao carregar o histórico de valor do localStorage:", error);
             return [];
         }
     });
@@ -212,8 +235,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 setServicos(parsedData);
             } catch (error) {
                 if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
-                console.error("Erro ao buscar serviços da API:", error);
-                console.log('Info: Não foi possível carregar os serviços. Isso pode ocorrer se não houver serviços cadastrados ou por um erro de conexão.');
+                // console.error("Erro ao buscar serviços da API:", error);
+                // console.log('Info: Não foi possível carregar os serviços. Isso pode ocorrer se não houver serviços cadastrados ou por um erro de conexão.');
             } finally {
                 setLoadingServicos(false);
             }
@@ -248,8 +271,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 const data = await response.json();
                 setSalesHistory(data);
             } catch (error) {
-                console.error("Erro ao buscar histórico de vendas da API:", error);
-                toast.error('Não foi possível carregar o histórico de vendas.');
+                // console.error("Erro ao buscar histórico de vendas da API:", error);
+                // toast.error('Não foi possível carregar o histórico de vendas.');
                 if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
                 setSalesHistory([]); // Limpa em caso de erro
             }
@@ -272,7 +295,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 if (Array.isArray(parsed)) return parsed;
             }
         } catch (error) {
-            console.error("Erro ao carregar o log de atividades:", error);
+            // console.error("Erro ao carregar o log de atividades:", error);
         }
         return [];
     });
@@ -298,8 +321,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 setClientes(data);
             } catch (error) {
                 if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
-                console.error("Erro ao buscar clientes da API:", error);
-                console.log('Info: Não foi possível carregar os clientes. Isso pode ocorrer se não houver clientes cadastrados ou por um erro de conexão.');
+                // console.error("Erro ao buscar clientes da API:", error);
+                // console.log('Info: Não foi possível carregar os clientes. Isso pode ocorrer se não houver clientes cadastrados ou por um erro de conexão.');
                 setClientes([]); // Limpa em caso de erro
             }
         };
@@ -324,8 +347,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 const data = await response.json();
                 setUsers(data);
             } catch (error) {
-                console.error("Erro ao buscar usuários da API:", error);
-                toast.error('Não foi possível carregar os usuários.');
+                // console.error("Erro ao buscar usuários da API:", error);
+                // toast.error('Não foi possível carregar os usuários.');
                 if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
             }
         };
@@ -355,8 +378,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                     const data = await response.json();
                     setBanners(data);
                 } catch (error) {
-                    console.error("Erro ao buscar banners para o admin:", error);
-                    toast.error('Não foi possível carregar os banners.');
+                    // console.error("Erro ao buscar banners para o admin:", error);
+                    // toast.error('Não foi possível carregar os banners.');
                 }
             }
         };
@@ -395,7 +418,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         try {
             localStorage.setItem('boycell-activityLog', JSON.stringify(activityLog));
         } catch (error) {
-            console.error("Erro ao salvar o log de atividades:", error);
+            // console.error("Erro ao salvar o log de atividades:", error);
         }
     }, [activityLog]);
 
@@ -447,8 +470,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                     };
                     reader.readAsDataURL(compressedFile);
                 } catch (error) {
-                    console.error('Erro ao comprimir imagem:', error);
-                    toast.error('Falha ao processar a imagem. Tente uma imagem menor ou de outro formato.');
+                    // console.error('Erro ao comprimir imagem:', error);
+                    // toast.error('Falha ao processar a imagem. Tente uma imagem menor ou de outro formato.');
                 }
             };
             compressAndSetImage();
@@ -476,6 +499,52 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             }
             return newState;
         });
+    };
+
+    const handleInputChange = (e) => handleItemChange(e, setNewProduct);
+    const handleEditInputChange = (e) => handleItemChange(e, setEditingProduct);
+
+    // ===================================================================
+    // PRODUCT CRUD
+    // ===================================================================
+    // CRUD handlers
+    const handleAddProduct = async (e, adminName) => {
+        e.preventDefault();
+        if (!newProduct.nome || !newProduct.categoria || !newProduct.marca || !newProduct.fornecedor || !newProduct.emEstoque || !newProduct.qtdaMinima || !newProduct.preco || !newProduct.precoFinal) {
+            // toast.error('Por favor, preencha todos os campos obrigatórios.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const response = await makeAuthRequest(`${API_URL}/api/products`, {
+                method: 'POST',
+                // Headers are added by makeAuthRequest
+                body: JSON.stringify({
+                    ...newProduct,
+                    emEstoque: parseInt(newProduct.emEstoque, 10),
+                    qtdaMinima: parseInt(newProduct.qtdaMinima, 10),
+                    preco: parseFloat(newProduct.preco),
+                    precoFinal: parseFloat(newProduct.precoFinal),
+                    tempoDeGarantia: parseInt(newProduct.tempoDeGarantia, 10) || 0,
+                })
+            });
+    
+            const data = await response.json();
+            // if (!response.ok) throw new Error(data.message || 'Erro ao adicionar produto.');
+    
+            setEstoque(prevEstoque => [...prevEstoque, data]);
+            logAdminActivity(adminName, 'Criação de Produto', `Produto "${data.nome}" foi criado.`);
+
+            // toast.success('Produto adicionado com sucesso!');
+            handleCloseAddModal();
+        } catch (error) {
+            if (error.message === 'Unauthorized access: Token invalid or expired.') return; // Already handled by makeAuthRequest
+            // toast.error(error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleUpdateProduct = async (e, adminName) => {
@@ -526,13 +595,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
     
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar produto.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao atualizar produto.');
     
             setEstoque(currentEstoque => currentEstoque.map(item => (item.id === editingProduct.id ? data : item)));
-            toast.success('Produto atualizado com sucesso!');
+            // toast.success('Produto atualizado com sucesso!');
             handleCloseEditModal();
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
         }
     };
 
@@ -548,13 +617,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 });
     
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erro ao excluir produto.');
+                // if (!response.ok) throw new Error(data.message || 'Erro ao excluir produto.');
     
                 setEstoque(currentEstoque => currentEstoque.filter(item => item.id !== idProduto));
                 logAdminActivity(adminName, 'Exclusão de Produto', `Produto "${productToDelete.nome}" (ID: ${idProduto}) foi excluído.`);
-                toast.success(data.message);
+                // toast.success(data.message);
             } catch (error) {
-                toast.error(error.message);
+                // toast.error(error.message);
             }
         }
     };
@@ -643,7 +712,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const handleAddServico = async (e, adminName) => {
         e.preventDefault();
         if (!newServico.servico || !newServico.fornecedor || !newServico.marca || !newServico.tipoReparo || !newServico.tecnico || !newServico.preco || !newServico.precoFinal) {
-            toast.error('Por favor, preencha todos os campos.');
+            // toast.error('Por favor, preencha todos os campos.');
             return;
         }
     
@@ -660,14 +729,14 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
     
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao adicionar serviço.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao adicionar serviço.');
     
             setServicos(prev => [...prev, data]);
             logAdminActivity(adminName, 'Criação de Serviço', `Serviço "${data.servico}" foi criado.`);
-            toast.success('Serviço adicionado com sucesso!');
+            // toast.success('Serviço adicionado com sucesso!');
             handleCloseAddServicoModal();
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
         }
     };
 
@@ -717,13 +786,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
     
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar serviço.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao atualizar serviço.');
     
             setServicos(currentServicos => currentServicos.map(s => (s.id === editingServico.id ? data : s)));
-            toast.success('Serviço atualizado com sucesso!');
+            // toast.success('Serviço atualizado com sucesso!');
             handleCloseEditServicoModal();
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
         }
     };
 
@@ -739,13 +808,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 });
     
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erro ao excluir serviço.');
+                // if (!response.ok) throw new Error(data.message || 'Erro ao excluir serviço.');
     
                 setServicos(currentServicos => currentServicos.filter(s => s.id !== id));
                 logAdminActivity(adminName, 'Exclusão de Serviço', `Serviço "${serviceToDelete.servico}" (ID: ${id}) foi excluído.`);
-                toast.success(data.message);
+                // toast.success(data.message);
             } catch (error) {
-                toast.error(error.message);
+                // toast.error(error.message);
             }
         }
     };
@@ -955,7 +1024,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             return data; // Return the complete sale object from the backend
         } catch (error) {
             if (error.message === 'Unauthorized access: Token invalid or expired.') return null; // Already handled by makeAuthRequest
-            toast.error(error.message);
+            // toast.error(error.message);
             return null;
         }
     };
@@ -974,16 +1043,16 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
 
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Erro ao criar usuário.');
-            }
+            // if (!response.ok) {
+            //     throw new Error(data.message || 'Erro ao criar usuário.');
+            // }
  
             setUsers(prevUsers => [...prevUsers, data]);
             logAdminActivity(adminName, 'Criação de Usuário', `Vendedor "${data.name}" (${data.email}) foi criado.`);
-            toast.success('Vendedor adicionado com sucesso!');
+            // toast.success('Vendedor adicionado com sucesso!');
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -994,11 +1063,11 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
         // Frontend validation for quick feedback
         if (userToDelete.role === 'root') {
-            toast.error('O usuário root não pode ser excluído.');
+            // toast.error('O usuário root não pode ser excluído.');
             return;
         }
         if (userToDelete.role === 'admin' && currentUser.role !== 'root') {
-            toast.error('Apenas o usuário root pode excluir um administrador.');
+            // toast.error('Apenas o usuário root pode excluir um administrador.');
             return;
         }
 
@@ -1009,13 +1078,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erro ao excluir usuário.');
+                // if (!response.ok) throw new Error(data.message || 'Erro ao excluir usuário.');
 
                 setUsers(currentUsers => currentUsers.filter(user => user.id !== userId));
                 logAdminActivity(adminName, 'Exclusão de Usuário', `Usuário "${userToDelete.name}" (${userToDelete.email}) foi excluído.`);
-                toast.success(data.message);
+                // toast.success(data.message);
             } catch (error) {
-                toast.error(error.message);
+                // toast.error(error.message);
             }
         }
     };
@@ -1033,7 +1102,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar usuário.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao atualizar usuário.');
 
             setUsers(currentUsers => currentUsers.map(user => (user.id === userId ? { ...user, ...data } : user)));
             
@@ -1054,10 +1123,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 logAdminActivity(adminName, 'Atualização de Usuário', `Dados do usuário "${oldUser.name}" atualizados: ${changes.join('; ')}.`);
             }
 
-            toast.success("Usuário atualizado com sucesso!");
+            // toast.success("Usuário atualizado com sucesso!");
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -1070,17 +1139,17 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar cliente.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao atualizar cliente.');
 
             setClientes(currentClientes =>
                 currentClientes.map(cliente => (cliente.id === clienteId ? data : cliente))
             );
 
             logAdminActivity(adminName, 'Atualização de Cliente', `Dados do cliente "${data.name}" foram atualizados.`);
-            toast.success("Cliente atualizado com sucesso!");
+            // toast.success("Cliente atualizado com sucesso!");
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -1096,7 +1165,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erro ao excluir cliente.');
+                // if (!response.ok) throw new Error(data.message || 'Erro ao excluir cliente.');
 
                 setClientes(currentClientes => currentClientes.filter(c => c.id !== clienteId));
                 // Também remove o histórico de vendas do cliente do estado local para atualizar os gráficos.
@@ -1106,9 +1175,9 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                     );
                 }
                 logAdminActivity(adminName, 'Exclusão de Cliente', `Cliente "${clienteToDelete.name}" (CPF: ${clienteToDelete.cpf}) foi excluído.`);
-                toast.success(data.message);
+                // toast.success(data.message);
             } catch (error) {
-                toast.error(error.message);
+                // toast.error(error.message);
             }
         }
     };
@@ -1139,10 +1208,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
-            toast.success('Backup realizado com sucesso!');
+            // toast.success('Backup realizado com sucesso!');
         } catch (error) {
-            console.error("Erro ao criar backup:", error);
-            toast.error('Ocorreu um erro ao criar o backup.');
+            // console.error("Erro ao criar backup:", error);
+            // toast.error('Ocorreu um erro ao criar o backup.');
         }
     };
 
@@ -1156,31 +1225,31 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 localStorage.setItem(`boycell-${key}`, JSON.stringify(restoredData[key]));
             });
 
-            toast.success('Dados restaurados localmente! A aplicação será recarregada.');
+            // toast.success('Dados restaurados localmente! A aplicação será recarregada.');
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
 
         } catch (error) {
-            console.error("Erro ao restaurar backup:", error);
-            toast.error('Arquivo de backup inválido ou corrompido.');
+            // console.error("Erro ao restaurar backup:", error);
+            // toast.error('Arquivo de backup inválido ou corrompido.');
         }
     };
 
     const handleResetUserPassword = async (userId, adminName, currentUser) => {
         const userToReset = users.find(user => user.id === userId);
         if (!userToReset) {
-            toast.error('Usuário não encontrado.');
+            // toast.error('Usuário não encontrado.');
             return;
         }
 
         // Validações no frontend para feedback rápido
         if (userToReset.role === 'root') {
-            toast.error('Não é possível resetar a senha do usuário root.');
+            // toast.error('Não é possível resetar a senha do usuário root.');
             return;
         }
         if (userToReset.role === 'admin' && currentUser.role !== 'root') {
-            toast.error('Apenas o usuário root pode resetar a senha de um administrador.');
+            // toast.error('Apenas o usuário root pode resetar a senha de um administrador.');
             return;
         }
 
@@ -1191,15 +1260,15 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 });
 
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Erro ao resetar senha.');
+                // if (!response.ok) throw new Error(data.message || 'Erro ao resetar senha.');
 
                 const { newPassword } = data;
                 logAdminActivity(adminName, 'Reset de Senha', `A senha do usuário "${userToReset.name}" foi resetada.`);
-                toast.success(`Senha de ${userToReset.name} resetada para: "${newPassword}"`, {
-                    duration: 10000,
-                });
+                // toast.success(`Senha de ${userToReset.name} resetada para: "${newPassword}"`, {
+                //     duration: 10000,
+                // });
             } catch (error) {
-                toast.error(error.message);
+                // toast.error(error.message);
             }
         }
     };
@@ -1213,12 +1282,12 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao solicitar recuperação.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao solicitar recuperação.');
 
-            toast.success(data.message);
+            // toast.success(data.message);
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -1230,13 +1299,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 body: JSON.stringify(newBannerData)
             });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao adicionar banner.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao adicionar banner.');
             setBanners(prev => [...prev, data].sort((a, b) => a.sort_order - b.sort_order));
             logAdminActivity(adminName, 'Criação de Banner', `Banner "${data.title || 'Novo'}" foi criado.`);
-            toast.success('Banner adicionado com sucesso!');
+            // toast.success('Banner adicionado com sucesso!');
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -1248,13 +1317,13 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 body: JSON.stringify(bannerData)
             });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao atualizar banner.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao atualizar banner.');
             setBanners(prev => prev.map(b => b.id === bannerId ? data : b).sort((a, b) => a.sort_order - b.sort_order));
             logAdminActivity(adminName, 'Atualização de Banner', `Banner "${data.title || 'ID: '+bannerId}" foi atualizado.`);
-            toast.success('Banner atualizado com sucesso!');
+            // toast.success('Banner atualizado com sucesso!');
             return true;
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
             return false;
         }
     };
@@ -1266,12 +1335,12 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 method: 'DELETE',
             });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Erro ao excluir banner.');
+            // if (!response.ok) throw new Error(data.message || 'Erro ao excluir banner.');
             setBanners(prev => prev.filter(b => b.id !== bannerId));
             logAdminActivity(adminName, 'Exclusão de Banner', `Banner com ID ${bannerId} foi excluído.`);
-            toast.success(data.message);
+            // toast.success(data.message);
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
         }
     };
 
@@ -1316,6 +1385,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
         newProduct,
         handleInputChange,
         handleAddProduct,
+        validateCPF,
+        validatePhone,
         isEditModalOpen,
         handleOpenEditModal,
         handleCloseEditModal,

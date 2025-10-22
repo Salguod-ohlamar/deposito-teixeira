@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, X, Edit, LogOut, ShoppingCart, Mail, Printer, Send, Banknote, CreditCard, QrCode, DollarSign, ShoppingBag, Calendar, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
-import ReciboVenda from './components/ReciboVenda';
-import Modal from './Modal.jsx';
+import ReciboVenda from './components/ReciboVenda.jsx';
+import Modal from './components/Modal.jsx';
 import { useEstoqueContext, PERMISSION_GROUPS } from './components/useEstoque.jsx';
 import { useTheme } from './ThemeContext.jsx';
 const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue, onToggle }) => {
@@ -30,6 +30,8 @@ const VendasPage = ({ onLogout, currentUser }) => {
     const navigate = useNavigate();
     const { theme, toggleTheme } = useTheme();
     const {
+        validateCPF,
+        validatePhone,
         handleSale,
         salesHistory,
         estoque,
@@ -427,12 +429,12 @@ const VendasPage = ({ onLogout, currentUser }) => {
         if (!currentUser) return false;
         // Garante que admin e root sempre tenham acesso
         if (['admin', 'root'].includes(currentUser.role)) return true;
-        if (!currentUser?.permissions) return false;
+        if (!currentUser.permissions) return false;
 
         // Qualquer permissão dentro destes grupos garante o acesso ao botão de gerenciamento
         const managementPermissions = [
-            ...Object.keys(PERMISSION_GROUPS.products.permissions),
-            ...Object.keys(PERMISSION_GROUPS.services.permissions),
+            ...Object.keys(PERMISSION_GROUPS?.products?.permissions || {}),
+            ...Object.keys(PERMISSION_GROUPS?.services?.permissions || {}),
         ];
 
         return managementPermissions.some(key => !!currentUser.permissions[key]);
@@ -442,7 +444,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
         <div className="bg-gray-950 text-gray-100 min-h-screen font-sans">
             <Toaster position="top-right" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
             <div id="recibo-printable-area" className="hidden">
-                <ReciboVenda saleDetails={lastSaleDetails} />
+                <ReciboVenda sale={lastSaleDetails} />
             </div>
             <div id="vendas-non-printable-area">
                 <header className="bg-gray-900 shadow-lg sticky top-0 z-20">
