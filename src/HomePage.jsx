@@ -246,20 +246,8 @@ const HomePage = ({ onLoginClick }) => {
 
                 <section id="ofertas" className="py-24 bg-gray-100 dark:bg-gray-900">
                     <div className="container mx-auto px-4">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Ofertas em Destaque</h2>
-                        </div>
-                        {loading ? (
-                            <div className="text-center text-lg text-gray-500 dark:text-gray-400">Carregando ofertas...</div>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                                {featuredProducts.length > 0 ? (
-                                    featuredProducts.map(product => (
-                                        <ProductCard key={product.id} product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} onComprarClick={handleComprarClick} />
-                                    ))
-                                ) : (<p className="col-span-full text-center text-gray-500 dark:text-gray-500">Nenhuma oferta encontrada para esta categoria.</p>)}
-                            </div>
-                        )}
+                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Nossas Ofertas</h2>
+                        <BannerCarousel banners={banners} />
                     </div>
                 </section>
 
