@@ -430,8 +430,8 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), // $1-$6
-            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, // $7-$12
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), // $1 - $6
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, // $7 - $12
             JSON.stringify(historico), !!is_offer, // $13, $14
             id // $15
         ];
@@ -572,13 +572,7 @@ app.post('/api/auth/recover', async (req, res) => {
 
 // Rota para criar um novo usuário (somente admin/root)
 app.post('/api/users/register', protect, async (req, res) => {
-    const { name, email, password, title, permissions } = req.body;
-    const requestingUser = req.user;
-
-    // Apenas root ou admin podem criar usuários.
-    if (requestingUser.role !== 'root' && requestingUser.role !== 'admin') {
-        return res.status(403).json({ message: 'Acesso negado.' });
-    }
+  const { name, email, password, title, permissions } = req.body;
   // Validação dos campos
   if (!name || !email || !password || !title) {
     return res.status(400).json({ message: 'Nome, email, senha e título do cargo são obrigatórios.' });
