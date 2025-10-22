@@ -6,6 +6,7 @@ import Modal from './Modal.jsx';
 import { useTheme } from './ThemeContext.jsx';
 import { useEstoqueContext } from './EstoqueContext.jsx';
 import DataTable from './DataTable.jsx';
+import { categories } from '../HomePage.jsx';
 
 // ===================================================================
 // DEFINIÇÃO DAS COLUNAS DA TABELA
@@ -456,7 +457,17 @@ const StockControl = ({ onLogout, currentUser }) => {
             </div>
             <div>
                 <label htmlFor="add-categoria" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
-                <input id="add-categoria" name="categoria" type="text" value={newProduct.categoria} onChange={handleInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                <select
+                    id="add-categoria"
+                    name="categoria"
+                    value={newProduct.categoria}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map(cat => (<option key={cat.name} value={cat.name}>{cat.name}</option>))}
+                </select>
             </div>
             <div>
                 <label htmlFor="add-marca" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
@@ -519,7 +530,17 @@ const StockControl = ({ onLogout, currentUser }) => {
                 </div>
                 <div>
                     <label htmlFor="edit-categoria" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoria</label>
-                    <input id="edit-categoria" name="categoria" type="text" value={editingProduct.categoria} onChange={handleEditInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <select
+                        id="edit-categoria"
+                        name="categoria"
+                        value={editingProduct.categoria}
+                        onChange={handleEditInputChange}
+                        required
+                        className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                        <option value="">Selecione uma categoria</option>
+                        {categories.map(cat => (<option key={cat.name} value={cat.name}>{cat.name}</option>))}
+                    </select>
                 </div>
                 <div>
                     <label htmlFor="edit-marca" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>

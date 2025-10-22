@@ -44,19 +44,19 @@ const TopBar = () => (
     </div>
 );
 
+export const categories = [
+    { name: 'Pisos e Revestimentos', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80' },
+    { name: 'Banheiros e Cozinhas', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=500&q=80' },
+    { name: 'Tintas e Acessórios', img: tintas },
+    { name: 'Elétrica e Iluminação', img: eletrica },
+    { name: 'Hidráulica', img: hidraulica },
+    { name: 'Ferramentas', img: ferramentas },
+];
+
 /**
  * Grade de categorias de produtos com imagens e links.
  */
 const  CategoryGrid = () => {
-    const categories = [
-        { name: 'Pisos e Revestimentos', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80' },
-        { name: 'Banheiros e Cozinhas', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=500&q=80' },
-        { name: 'Tintas e Acessórios', img: tintas },
-        { name: 'Elétrica e Iluminação', img: eletrica },
-        { name: 'Hidráulica', img: hidraulica },
-        { name: 'Ferramentas', img: ferramentas },
-    ];
-
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map(cat => (
@@ -77,10 +77,8 @@ const  CategoryGrid = () => {
 const BrandsSection = () => {
     const brands = [
         tigreLogo,
-        amancoLogo,
-        elginLogo,
-        oroluxLogo,
-        votoranLogo,
+        amancoLogo,        
+        oroluxLogo,       
         caueLogo,
     ];
 
@@ -132,7 +130,10 @@ const HomePage = ({ onLoginClick }) => {
                 if (!productsResponse.ok) throw new Error('Falha ao buscar produtos.');
                 const products = await productsResponse.json();
 
-                setFeaturedProducts(products.filter(p => p.destaque === true));
+                // Filtra produtos que são destaque E pertencem a uma das categorias principais
+                const categoryNames = new Set(categories.map(c => c.name));
+                const featured = products.filter(p => p.destaque === true && categoryNames.has(p.categoria));
+                setFeaturedProducts(featured);
 
             } catch (error) {
                 console.error("Erro ao carregar dados da página inicial:", error);
