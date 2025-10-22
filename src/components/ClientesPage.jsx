@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'react-hot-toast';
 import Modal from './Modal.jsx';
 import { useEstoqueContext } from './EstoqueContext.jsx';
-import ReciboVenda from './ReciboVenda.jsx';
+import ReciboVenda from './ReciboVenda';
 import { useTheme } from './ThemeContext.jsx';
 
 const ClientesPage = ({ onLogout, currentUser }) => {
@@ -72,7 +72,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
     const handleCloseReprintModal = () => setReprintingSale(null);
 
     const handlePrintRecibo = () => {
-        document.body.classList.add('print-mode-recibo');
+        document.body.classList.add('print-mode-recibo'); 
         window.print();
     };
 
@@ -141,23 +141,20 @@ const ClientesPage = ({ onLogout, currentUser }) => {
     };
 
     return (
-        <div className="bg-gray-950 text-gray-100 min-h-screen font-sans">
+        <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen font-sans">
             <div id="recibo-printable-area" className="hidden">
-                <ReciboVenda saleDetails={reprintingSale} />
+                <ReciboVenda sale={reprintingSale} />
             </div>
             <Toaster position="top-right" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
-            <header className="bg-gray-900 shadow-lg sticky top-0 z-20">
+            <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
                 <nav className="container mx-auto flex items-center justify-between p-4">
-                    <h1 className="text-2xl font-bold text-white">Gerenciar Clientes</h1>
+                    <h1 className="text-xl lg:text-2xl font-bold tracking-wider text-white">Gerenciar Clientes</h1>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors" title="Voltar ao Estoque">
+                        <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-white hover:bg-white/20 p-2 rounded-md transition-colors" title="Voltar ao Estoque">
                             <ArrowLeft size={20} />
                             <span className="hidden sm:inline">Voltar ao Estoque</span>
                         </button>
-            <button onClick={toggleTheme} className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors" title={`Alterar para Tema ${theme === 'dark' ? 'Claro' : 'Escuro'}`}>
-                {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-                        <button onClick={onLogout} className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors" title="Sair">
+                        <button onClick={onLogout} className="inline-flex items-center gap-2 text-white hover:bg-white/20 p-2 rounded-md transition-colors" title="Sair">
                             <LogOut size={20} />
                             <span className="hidden sm:inline">Sair</span>
                         </button>
@@ -165,8 +162,8 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                 </nav>
             </header>
 
-            <main className="container mx-auto p-4 mt-8 space-y-8">
-                <div className="bg-gray-900 p-8 rounded-2xl shadow-xl">
+            <main className="container mx-auto p-4 lg:p-8 mt-8 space-y-12">
+                <div className="bg-white dark:bg-gray-900 p-6 lg:p-8 rounded-2xl shadow-lg">
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -175,7 +172,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                             <input
                                 type="text"
                                 placeholder="Buscar cliente..."
-                                className="w-full p-3 pl-10 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full p-3 pl-10 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -184,7 +181,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
 
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="border-b border-gray-700">
+                            <thead className="border-b border-gray-200 dark:border-gray-700">
                                 <tr>
                                     <th className="p-4 font-semibold">Nome</th>
                                     <th className="p-4 font-semibold">CPF/CNPJ</th>
@@ -196,7 +193,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                             </thead>
                             <tbody>
                                 {paginatedClientes.length > 0 ? paginatedClientes.map((cliente) => (
-                                    <tr key={cliente.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                                    <tr key={cliente.id} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/50">
                                         <td className="p-4 font-medium">{cliente.name}</td>
                                         <td className="p-4">{cliente.cpf}</td>
                                         <td className="p-4">{cliente.email || '-'}</td>
@@ -204,13 +201,13 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                         <td className="p-4">{new Date(cliente.lastPurchase).toLocaleDateString('pt-BR')}</td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-4">
-                                                <button onClick={() => handleOpenHistoryModal(cliente)} className="text-purple-400 hover:text-purple-300" title="Histórico de Compras">
+                                                <button onClick={() => handleOpenHistoryModal(cliente)} className="text-purple-500 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300" title="Histórico de Compras">
                                                     <History size={18} />
                                                 </button>
-                                                <button onClick={() => handleOpenEditModal(cliente)} className="text-blue-400 hover:text-blue-300" title="Editar Cliente">
+                                                <button onClick={() => handleOpenEditModal(cliente)} className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300" title="Editar Cliente">
                                                     <Edit size={18} />
                                                 </button>
-                                                <button onClick={async () => await handleDeleteCliente(cliente.id, currentUser.name)} className="text-red-400 hover:text-red-300" title="Excluir Cliente">
+                                                <button onClick={async () => await handleDeleteCliente(cliente.id, currentUser.name)} className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300" title="Excluir Cliente">
                                                     <Trash2 size={18} />
                                                 </button>
                                             </div>
@@ -218,7 +215,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="6" className="p-8 text-center text-gray-500">Nenhum cliente encontrado.</td>
+                                        <td colSpan="6" className="p-8 text-center text-gray-500 dark:text-gray-400">Nenhum cliente encontrado.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -227,12 +224,12 @@ const ClientesPage = ({ onLogout, currentUser }) => {
 
                     {totalPages > 1 && (
                         <div className="mt-6 flex justify-between items-center">
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                                 Página {currentPage} de {totalPages}
                             </span>
                             <div className="flex items-center gap-2">
-                                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700"><ChevronLeft size={20} /></button>
-                                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700"><ChevronRight size={20} /></button>
+                                <button onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} className="p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700"><ChevronLeft size={20} /></button>
+                                <button onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} className="p-2 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-gray-700"><ChevronRight size={20} /></button>
                             </div>
                         </div>
                     )}
@@ -240,7 +237,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
             </main>
 
             <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
-                <h2 className="text-2xl font-bold text-center text-blue-400 mb-6">Editar Cliente</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Cliente</h2>
                 {editingCliente && (
                     <form className="space-y-4" onSubmit={handleUpdateSubmit}>
                         <div>
@@ -252,7 +249,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                 value={editingCliente.name}
                                 onChange={handleEditChange}
                                 required
-                                className="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             />
                         </div>
                         <div>
@@ -264,7 +261,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                 value={editingCliente.cpf}
                                 onChange={handleEditChange}
                                 required
-                                className="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             />
                         </div>
                         <div>
@@ -275,7 +272,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                 type="email"
                                 value={editingCliente.email}
                                 onChange={handleEditChange}
-                                className="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             />
                         </div>
                         <div>
@@ -287,10 +284,10 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                 value={editingCliente.phone}
                                 onChange={handleEditChange}
                                 required
-                                className="mt-1 block w-full p-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             />
                         </div>
-                        <button type="submit" className="w-full mt-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                        <button type="submit" className="w-full mt-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Salvar Alterações
                         </button>
                     </form>
@@ -300,8 +297,8 @@ const ClientesPage = ({ onLogout, currentUser }) => {
             <Modal isOpen={isHistoryModalOpen} onClose={handleCloseHistoryModal} size="xl">
                 {selectedCliente && (
                     <>
-                        <h2 className="text-2xl font-bold text-center text-purple-400 mb-2">Histórico de Compras</h2>
-                        <p className="text-center text-lg font-semibold text-white mb-6">{selectedCliente.name}</p>
+                        <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-2">Histórico de Compras</h2>
+                        <p className="text-center text-lg font-semibold text-gray-900 dark:text-white mb-6">{selectedCliente.name}</p>
 
                         <div className="relative mb-6">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -310,7 +307,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                             <input
                                 type="text"
                                 placeholder="Buscar por código ou produto..."
-                                className="w-full p-3 pl-10 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full p-3 pl-10 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                 value={historySearchTerm}
                                 onChange={(e) => setHistorySearchTerm(e.target.value)}
                             />
@@ -319,13 +316,13 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                         <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4">
                             {clienteSalesHistory.length > 0 ? (
                                 clienteSalesHistory.map(sale => (
-                                    <div key={sale.id} className="p-4 bg-gray-800 rounded-lg border-l-4 border-purple-500">
+                                    <div key={sale.id} className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-l-4 border-red-500">
                                         <div className="flex justify-between items-start mb-3">
                                             <div className="flex-grow">
-                                                <p className="text-sm text-gray-400">{new Date(sale.date).toLocaleString('pt-BR')}</p>
-                                                {sale.receiptCode && <p className="text-xs text-gray-500 font-mono">Cód: {sale.receiptCode}</p>}
-                                                <p className="text-lg font-bold text-purple-300">Total: {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                                <p className="text-sm text-gray-300">Pagamento: <span className="font-semibold text-purple-200">{sale.paymentMethod}</span></p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(sale.date).toLocaleString('pt-BR')}</p>
+                                                {sale.receiptCode && <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">Cód: {sale.receiptCode}</p>}
+                                                <p className="text-lg font-bold text-red-600 dark:text-red-400">Total: {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                                <p className="text-sm text-gray-600 dark:text-gray-300">Pagamento: <span className="font-semibold text-red-700 dark:text-red-300">{sale.paymentMethod}</span></p>
                                             </div>
                                             <div className="flex-shrink-0">
                                                 <button onClick={() => handleOpenReprintModal(sale)} className="inline-flex items-center gap-2 px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white text-xs font-medium rounded-full transition-colors">
@@ -334,15 +331,15 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                                                 </button>
                                             </div>
                                         </div>
-                                        <div className="border-t border-gray-700 pt-2">
-                                            <p className="text-sm font-semibold mb-1 text-gray-200">Itens:</p>
-                                            <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                                        <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+                                            <p className="text-sm font-semibold mb-1 text-gray-800 dark:text-gray-200">Itens:</p>
+                                            <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1">
                                                 {sale.items.map(item => (<li key={`${item.type}-${item.id}`}>{item.nome || item.servico} (x{item.quantity})</li>))}
                                             </ul>
                                         </div>
                                     </div>
                                 ))
-                            ) : (<p className="text-center text-gray-500 py-16">Nenhuma compra encontrada para este cliente com os filtros atuais.</p>)}
+                            ) : (<p className="text-center text-gray-500 dark:text-gray-400 py-16">Nenhuma compra encontrada para este cliente com os filtros atuais.</p>)}
                         </div>
                     </>
                 )}
@@ -351,9 +348,9 @@ const ClientesPage = ({ onLogout, currentUser }) => {
             <Modal isOpen={reprintingSale !== null} onClose={handleCloseReprintModal}>
                 {reprintingSale && (
                     <>
-                        <h2 className="text-2xl font-bold text-center text-blue-400 mb-4">Reimpressão de Recibo</h2>
+                        <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-4">Reimpressão de Recibo</h2>
                         <div className="bg-white rounded-lg overflow-y-auto max-h-[60vh]">
-                            <ReciboVenda saleDetails={reprintingSale} />
+                            <ReciboVenda sale={reprintingSale} />
                         </div>
                         <div className="mt-6 flex flex-col sm:flex-row justify-end gap-4">
                             <button onClick={handleWhatsAppRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-full transition-colors">
@@ -362,7 +359,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                             <button onClick={handleEmailRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-full transition-colors">
                                 <Mail size={18} /> Enviar por Email
                             </button>
-                            <button onClick={handlePrintRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full transition-colors">
+                            <button onClick={handlePrintRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full transition-colors">
                                 <Printer size={18} /> Imprimir / Salvar PDF
                             </button>
                         </div>

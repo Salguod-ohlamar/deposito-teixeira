@@ -17,7 +17,7 @@ import { PERMISSION_GROUPS, getDefaultPermissions } from './components/useEstoqu
 const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue, onToggle }) => {
   const Icon = icon;
   return (
-    <div className={`bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl flex items-center gap-6 border-l-4 ${colorClass}`}>
+    <div className={`bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg flex items-center gap-6 border-l-4 ${colorClass}`}>
       <Icon size={32} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
       <div>
         <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
@@ -36,7 +36,7 @@ const DashboardCard = ({ icon, title, value, colorClass, isToggleable, showValue
 
 const ChartContainer = ({ title, show, onToggle, children, onDragStart, onDragEnter, onDragEnd }) => (
   <div 
-    className="bg-gray-100 dark:bg-gray-800/50 p-6 rounded-xl flex flex-col transition-shadow duration-300 shadow-lg hover:shadow-cyan-500/20"
+    className="bg-gray-100 dark:bg-gray-800/50 p-6 rounded-xl flex flex-col transition-shadow duration-300 shadow-lg hover:shadow-red-500/20"
     draggable={true}
     onDragStart={onDragStart}
     onDragEnter={onDragEnter}
@@ -45,7 +45,7 @@ const ChartContainer = ({ title, show, onToggle, children, onDragStart, onDragEn
   >
     <div className="flex justify-between items-center mb-4 cursor-move group">
       <div className="flex items-center gap-2">
-        <GripVertical size={20} className="text-gray-500 group-hover:text-cyan-500 dark:group-hover:text-cyan-400 transition-colors" />
+        <GripVertical size={20} className="text-gray-500 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors" />
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
       </div>
       <button onClick={onToggle} className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
@@ -559,13 +559,13 @@ const AdminPage = ({ onLogout, currentUser }) => {
     }, [salesHistory, salesChartPeriod]);
 
     const actionButtonClasses = "w-full inline-flex items-center justify-start gap-3 px-4 py-3 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors duration-300 text-sm";
-
+ 
     return (
         <div className="bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen font-sans leading-relaxed">
             <Toaster position="top-right" toastOptions={{ className: 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white', style: { background: 'transparent', boxShadow: 'none' } }} />
             <input type="file" ref={restoreInputRef} onChange={handleFileRestore} accept=".json" className="hidden" />
             <div id="recibo-printable-area" className="hidden">
-                <ReciboVenda saleDetails={reprintingSale} />
+                <ReciboVenda sale={reprintingSale} />
             </div>
             <div id="monthly-report-printable-area" className="hidden">
                 <RelatorioVendasMensal reportData={monthlySalesReport} />
@@ -576,28 +576,30 @@ const AdminPage = ({ onLogout, currentUser }) => {
             <div id="dre-report-printable-area" className="hidden">
                 <DreReport reportData={dreData} />
             </div>
-
-            <main id="admin-non-printable-area" className="container mx-auto px-4 py-8 md:py-16">
-                <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Painel de Administração</h1>
-                    <div>
+ 
+            <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
+                <nav className="container mx-auto flex items-center justify-between p-4">
+                    <h1 className="text-xl lg:text-2xl font-bold tracking-wider text-white">Olá, {currentUser?.name?.split(' ')[0] || 'Admin'}!</h1>
+                    <div className="flex items-center gap-4">
                         {hasStockPermission && (
-                            <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors mr-4" title="Voltar ao Estoque">
+                            <button onClick={() => navigate('/estoque')} className="inline-flex items-center gap-2 text-white hover:bg-white/20 p-2 rounded-md transition-colors" title="Voltar ao Estoque">
                                 <ArrowLeft size={20} />
                                 <span className="hidden sm:inline">Voltar ao Estoque</span>
                             </button>
                         )}
-                        <button onClick={onLogout} className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 transition-colors ml-2" title="Sair">
+                        <button onClick={onLogout} className="inline-flex items-center gap-2 text-white hover:bg-white/20 p-2 rounded-md transition-colors" title="Sair">
                             <LogOut size={20} />
                             <span className="hidden sm:inline">Sair</span>
                         </button>
                     </div>
-                </div>
+                </nav>
+            </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <main id="admin-non-printable-area" className="container mx-auto px-4 py-8 md:py-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Painel de Administração */}
-                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-purple-500 md:col-span-1 lg:col-span-1">
-                        <h3 className="text-xl font-semibold text-purple-600 dark:text-purple-400 mb-4">Gerenciamento</h3>
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
+                        <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Gerenciamento</h3>
                         <div className="flex flex-col gap-3">
                             {currentUser?.permissions?.manageUsers && (
                                 <>
@@ -618,8 +620,8 @@ const AdminPage = ({ onLogout, currentUser }) => {
                     </div>
 
                     {currentUser?.permissions?.manageBanners && (
-                        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-green-500 md:col-span-1 lg:col-span-1">
-                            <h3 className="text-xl font-semibold text-green-600 dark:text-green-400 mb-4">Conteúdo do Site</h3>
+                        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
+                            <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Conteúdo do Site</h3>
                             <div className="flex flex-col gap-3">
                                 <button onClick={() => setIsBannerModalOpen(true)} className={actionButtonClasses}>
                                     <ImageIcon size={18} /> Gerenciar Banners
@@ -628,8 +630,8 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         </div>
                     )}
 
-                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-cyan-500 md:col-span-1 lg:col-span-1">
-                        <h3 className="text-xl font-semibold text-cyan-600 dark:text-cyan-400 mb-4">Relatórios e Dados</h3>
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-1 lg:col-span-1">
+                        <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Relatórios e Dados</h3>
                         <div className="flex flex-col gap-3">
                             {currentUser?.permissions?.viewDashboardCharts && (
                                 <button onClick={handleOpenChartsModal} className={actionButtonClasses}>
@@ -659,8 +661,8 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-yellow-500 md:col-span-2 lg:col-span-1">
-                        <h3 className="text-xl font-semibold text-yellow-600 dark:text-yellow-400 mb-4">Sistema</h3>
+                    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border-t-4 border-red-600 md:col-span-2 lg:col-span-1">
+                        <h3 className="text-xl font-semibold text-red-600 dark:text-red-500 mb-4">Sistema</h3>
                         <div className="flex flex-col gap-3">
                             {currentUser?.permissions?.manageTheme && (
                                 <button onClick={toggleTheme} className={actionButtonClasses}>
@@ -694,7 +696,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isUserSalesReportModalOpen} onClose={() => setIsUserSalesReportModalOpen(false)} size="xl">
-                <h2 className="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-6">Relatório de Vendas por Vendedor</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Relatório de Vendas por Vendedor</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                     <div className="flex items-center gap-2">
                         <label htmlFor="userSelect" className="text-sm font-medium text-gray-700 dark:text-gray-300">Vendedor:</label>
@@ -730,10 +732,10 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             className="p-2 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
                         />
                     </div>
-                    <button onClick={handleGenerateUserSalesReport} disabled={loadingUserSalesReport} className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
+                    <button onClick={handleGenerateUserSalesReport} disabled={loadingUserSalesReport} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
                         {loadingUserSalesReport ? 'Gerando...' : 'Gerar Relatório'}
                     </button>
-                    <button onClick={handlePrintUserSalesReport} disabled={!userSalesReportData} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
+                    <button onClick={handlePrintUserSalesReport} disabled={!userSalesReportData} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
                         <Printer size={16} /> Imprimir
                     </button>
                 </div>
@@ -742,7 +744,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isDreModalOpen} onClose={() => setIsDreModalOpen(false)} size="xl">
-                <h2 className="text-2xl font-bold text-center text-green-600 dark:text-green-400 mb-6">DRE Simplificado</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">DRE Simplificado</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                     <div className="flex items-center gap-2">
                         <label htmlFor="dreStartDate" className="text-sm font-medium text-gray-700 dark:text-gray-300">De:</label>
@@ -764,10 +766,10 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             className="p-2 bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
                         />
                     </div>
-                    <button onClick={handleGenerateDreReport} disabled={loadingDre} className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
+                    <button onClick={handleGenerateDreReport} disabled={loadingDre} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
                         {loadingDre ? 'Gerando...' : 'Gerar Relatório'}
                     </button>
-                    <button onClick={handlePrintDre} disabled={!dreData} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
+                    <button onClick={handlePrintDre} disabled={!dreData} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors disabled:bg-gray-500">
                         <Printer size={16} /> Imprimir
                     </button>
                 </div>
@@ -782,7 +784,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isUserManagementModalOpen} onClose={handleCloseUserManagementModal} size="lg">
-                <h2 className="text-2xl font-bold text-center text-purple-600 dark:text-purple-400 mb-6">Gerenciar Usuários</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Gerenciar Usuários</h2>
                 <div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Usuários Cadastrados</h3>
                     <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
@@ -796,17 +798,17 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                         <p className="text-sm text-gray-400">{user.email}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className={`px-2 py-1 text-xs font-bold rounded-full ${userRoleClass}`}>{user.title || user.role}</span>
+                                        <span className={`px-2 py-1 text-xs font-bold rounded-full ${userRoleClass}`}>{user.title || user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
                                         {showManagementButtons && (<>
                                             {currentUser.permissions?.resetUserPassword && (
-                                            <button onClick={() => handleResetUserPassword(user.id, currentUser.name, currentUser)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title="Resetar Senha">
+                                            <button onClick={() => handleResetUserPassword(user.id, currentUser.name, currentUser)} className="text-yellow-500 hover:text-yellow-400 transition-colors" title="Resetar Senha">
                                                     <KeyRound size={18} />
                                                 </button>
                                             )}
-                                        <button onClick={() => handleOpenEditUserModal(user)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar Usuário">
+                                        <button onClick={() => handleOpenEditUserModal(user)} className="text-blue-500 hover:text-blue-400 transition-colors" title="Editar Usuário">
                                                 <Edit size={18} />
                                             </button>
-                                        <button onClick={async () => await handleDeleteUser(user.id, currentUser.name, currentUser)} className="text-red-400 hover:text-red-300 transition-colors" title="Excluir Usuário"><Trash2 size={18} /></button>
+                                        <button onClick={async () => await handleDeleteUser(user.id, currentUser.name, currentUser)} className="text-red-500 hover:text-red-400 transition-colors" title="Excluir Usuário"><Trash2 size={18} /></button>
                                         </>)}
                                     </div>
                                 </div>
@@ -817,7 +819,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isEditUserModalOpen} onClose={handleCloseEditUserModal} size="xl">
-                <h2 className="text-2xl font-bold text-center text-blue-600 dark:text-blue-400 mb-6">Editar Usuário</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Usuário</h2>
                 {editingUser && (
                     <form className="space-y-4" onSubmit={handleUpdateUserSubmit}>
                         <div>
@@ -842,7 +844,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                     value={editingUser.title || ''}
                                     onChange={handleEditUserChange}
                                     placeholder="Ex: Gerente, Supervisor"
-                                    className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                                 />
                             </div>
                         )}
@@ -866,7 +868,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                                                     permissions: { ...(prev.permissions || {}), [key]: checked }
                                                                 }));
                                                             }}
-                                                            className="form-checkbox h-4 w-4 text-blue-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500"
+                                                            className="form-checkbox h-4 w-4 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500"
                                                         />
                                                         <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
                                                     </label>
@@ -880,7 +882,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                 </div>
                             </div>
                         ) : null}
-                        <button type="submit" className="w-full mt-4 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                        <button type="submit" className="w-full mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Salvar Alterações
                         </button>
                     </form>
@@ -888,19 +890,19 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isAddUserModalOpen} onClose={handleCloseAddUserModal}>
-                <h2 className="text-2xl font-bold text-center text-purple-600 dark:text-purple-400 mb-6">Adicionar Novo Usuário</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Adicionar Novo Usuário</h2>
                 <form className="space-y-4" onSubmit={handleAddNewUser}>
                     <div>
                         <label htmlFor="user-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
-                        <input id="user-name" name="name" type="text" value={newUserData.name} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                        <input id="user-name" name="name" type="text" value={newUserData.name} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
                     </div>
                     <div>
                         <label htmlFor="user-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input id="user-email" name="email" type="email" value={newUserData.email} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                        <input id="user-email" name="email" type="email" value={newUserData.email} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
                     </div>
                     <div>
                         <label htmlFor="user-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Senha</label>
-                        <input id="user-password" name="password" type="password" value={newUserData.password} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                        <input id="user-password" name="password" type="password" value={newUserData.password} onChange={handleNewUserChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
                     </div>
                     <div className="md:col-span-2">
                         <label htmlFor="user-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Título do Cargo (Apelido)</label>
@@ -909,7 +911,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             name="title"
                             type="text"
                             value={newUserData.title} onChange={handleNewUserChange} required
-                            className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                             placeholder="Ex: Vendedor, Gerente" />
                     </div>
                     {/* Seção de Permissões para Adicionar Usuário */}
@@ -932,7 +934,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                                             permissions: { ...(prev.permissions || {}), [key]: checked }
                                                         }));
                                                     }}
-                                                    className="form-checkbox h-4 w-4 text-purple-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-purple-500"
+                                                    className="form-checkbox h-4 w-4 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500"
                                                 />
                                                 <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
                                             </label>
@@ -945,14 +947,14 @@ const AdminPage = ({ onLogout, currentUser }) => {
                             ))}
                         </div>
                     </div>
-                    <button type="submit" className="w-full mt-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
+                    <button type="submit" className="w-full mt-2 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                         Adicionar Usuário
                     </button>
                 </form>
             </Modal>
 
             <Modal isOpen={isActivityLogModalOpen} onClose={() => setIsActivityLogModalOpen(false)} size="2xl">
-                <h2 className="text-2xl font-bold text-center text-orange-600 dark:text-orange-400 mb-6">Log de Atividades do Administrador</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Log de Atividades</h2>
                 <div className="flex flex-wrap items-center justify-center gap-4 mb-6 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                     <div className="flex items-center gap-2">
                         <label htmlFor="logActionFilter" className="text-sm font-medium text-gray-700 dark:text-gray-300">Ação:</label>
@@ -992,9 +994,9 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
                     {filteredActivityLog && filteredActivityLog.length > 0 ? (
                         filteredActivityLog.map(log => (
-                            <div key={log.id} className="p-3 bg-gray-200 dark:bg-gray-800 rounded-lg border-l-4 border-orange-500">
+                            <div key={log.id} className="p-3 bg-gray-200 dark:bg-gray-800 rounded-lg border-l-4 border-red-500">
                                 <div className="flex justify-between items-center text-sm mb-1">
-                                    <p className="font-bold text-orange-600 dark:text-orange-300">{log.action}</p>
+                                    <p className="font-bold text-red-600 dark:text-red-400">{log.action}</p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(log.timestamp).toLocaleString('pt-BR')}</p>
                                 </div>
                                 <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -1009,7 +1011,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isSalesHistoryModalOpen} onClose={handleCloseSalesHistoryModal} size="md">
-                <h2 className="text-2xl font-bold text-center text-yellow-600 dark:text-yellow-400 mb-6">Histórico de Vendas</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Histórico de Vendas</h2>
                 <div className="space-y-6">
                     <div className="p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                         <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Filtrar por Período</h4>
@@ -1043,7 +1045,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                                     {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (<option key={year} value={year}>{year}</option>))}
                                 </select>
                             </div>
-                            <button onClick={handlePrintMonthlyReport} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white text-sm font-medium rounded-lg transition-colors">
+                            <button onClick={handlePrintMonthlyReport} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors">
                                 <Printer size={16} /> Imprimir
                             </button>
                         </div>
@@ -1057,7 +1059,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
                     <input
                         type="text"
                         placeholder="Buscar por cliente, CPF ou produto..."
-                        className="w-full p-3 pl-10 bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                        className="w-full p-3 pl-10 bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                         value={salesHistorySearchTerm}
                         onChange={(e) => setSalesHistorySearchTerm(e.target.value)}
                     />
@@ -1066,14 +1068,14 @@ const AdminPage = ({ onLogout, currentUser }) => {
                 <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4">
                     {paginatedSalesHistory.length > 0 ? (
                         paginatedSalesHistory.map(sale => (
-                            <div key={sale.id} className="p-4 bg-gray-200 dark:bg-gray-800 rounded-lg border-l-4 border-yellow-500">
+                            <div key={sale.id} className="p-4 bg-gray-200 dark:bg-gray-800 rounded-lg border-l-4 border-red-500">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-grow">
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(sale.date).toLocaleString('pt-BR')}</p>
                                         {sale.receiptCode && <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">Cód: {sale.receiptCode}</p>}
-                                        <p className="text-lg font-bold text-yellow-600 dark:text-yellow-300">Total: {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                                        <p className="text-lg font-bold text-red-600 dark:text-red-400">Total: {sale.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                                         {sale.customer && <p className="text-sm text-gray-700 dark:text-gray-300">Cliente: <span className="font-medium">{sale.customer}</span></p>}
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">Pagamento: <span className="font-semibold text-yellow-700 dark:text-yellow-200">{sale.paymentMethod}</span></p>
+                                        <p className="text-sm text-gray-700 dark:text-gray-300">Pagamento: <span className="font-semibold text-red-700 dark:text-red-300">{sale.paymentMethod}</span></p>
                                         {sale.vendedor && <p className="text-sm text-gray-700 dark:text-gray-300">Vendedor: <span className="font-medium">{sale.vendedor}</span></p>}
                                     </div>
                                     <div className="flex-shrink-0">
@@ -1107,7 +1109,7 @@ const AdminPage = ({ onLogout, currentUser }) => {
             </Modal>
 
             <Modal isOpen={isChartsModalOpen} onClose={handleCloseChartsModal} size="2xl">
-                <h2 className="text-2xl font-bold text-center text-cyan-600 dark:text-cyan-400 mb-6">Análise Gráfica</h2>
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Análise Gráfica</h2>
                 {renderCharts ? (
                 <div className="max-h-[80vh] overflow-y-auto p-2">
                     <div className="bg-gray-200 dark:bg-gray-900/50 p-6 rounded-2xl mb-8">
@@ -1135,23 +1137,23 @@ const AdminPage = ({ onLogout, currentUser }) => {
                         let chartContent = null;
 
                         switch(chart.id) {
-                        case 'evolution':
-                            chartContent = <AreaChart data={stockValueHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis dataKey="date" tickFormatter={(timeStr) => new Date(timeStr).toLocaleDateString('pt-BR')} stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), "Valor"]} /><Legend /><Area type="monotone" dataKey="value" stroke="#38B2AC" fill="#38B2AC" fillOpacity={0.3} name="Valor do Estoque" /></AreaChart>;
-                            break;
+                        case 'evolution': 
+                            chartContent = <AreaChart data={stockValueHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis dataKey="date" tickFormatter={(timeStr) => new Date(timeStr).toLocaleDateString('pt-BR')} stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), "Valor"]} /><Legend /><Area type="monotone" dataKey="value" stroke="#e53e3e" fill="#e53e3e" fillOpacity={0.3} name="Valor do Estoque" /></AreaChart>;
+                            break; 
                         case 'salesPeriod':
-                            chartContent = <><div className="flex justify-center gap-2 mb-4"><button onClick={() => setSalesChartPeriod('day')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'day' ? 'bg-cyan-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Dia</button><button onClick={() => setSalesChartPeriod('week')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'week' ? 'bg-cyan-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Semana</button><button onClick={() => setSalesChartPeriod('month')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'month' ? 'bg-cyan-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Mês</button></div><ResponsiveContainer width="100%" height="85%"><BarChart data={salesByPeriodData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis dataKey="period" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(str) => { if (salesChartPeriod === 'month') return new Date(str + '-02').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }); return new Date(str).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); }} minTickGap={20} /><YAxis stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(value) => `R$${value >= 1000 ? `${value/1000}k` : value}`} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), "Total Vendido"]} labelFormatter={(label) => { if (salesChartPeriod === 'month') return new Date(label + '-02').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); if (salesChartPeriod === 'week') return `Semana de ${new Date(label).toLocaleDateString('pt-BR', { dateStyle: 'short' })}`; return new Date(label).toLocaleDateString('pt-BR', { dateStyle: 'long' }); }} /><Legend wrapperStyle={{ paddingTop: '20px' }} /><Bar dataKey="total" fill="#FF8042" name="Total Vendido" /></BarChart></ResponsiveContainer></>;
+                            chartContent = <><div className="flex justify-center gap-2 mb-4"><button onClick={() => setSalesChartPeriod('day')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'day' ? 'bg-red-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Dia</button><button onClick={() => setSalesChartPeriod('week')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'week' ? 'bg-red-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Semana</button><button onClick={() => setSalesChartPeriod('month')} className={`px-3 py-1 text-sm rounded-full transition-colors ${salesChartPeriod === 'month' ? 'bg-red-600 text-white' : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600'}`}>Mês</button></div><ResponsiveContainer width="100%" height="85%"><BarChart data={salesByPeriodData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis dataKey="period" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(str) => { if (salesChartPeriod === 'month') return new Date(str + '-02').toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }); return new Date(str).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); }} minTickGap={20} /><YAxis stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} tickFormatter={(value) => `R$${value >= 1000 ? `${value/1000}k` : value}`} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), "Total Vendido"]} labelFormatter={(label) => { if (salesChartPeriod === 'month') return new Date(label + '-02').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); if (salesChartPeriod === 'week') return `Semana de ${new Date(label).toLocaleDateString('pt-BR', { dateStyle: 'short' })}`; return new Date(label).toLocaleDateString('pt-BR', { dateStyle: 'long' }); }} /><Legend wrapperStyle={{ paddingTop: '20px' }} /><Bar dataKey="total" fill="#c53030" name="Total Vendido" /></BarChart></ResponsiveContainer></>;
                             break;
                         case 'topSellingProducts':
-                            chartContent = <BarChart data={dashboardData.topSellingProducts} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} allowDecimals={false} /><YAxis dataKey="name" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={120} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Unidades Vendidas"]} /><Bar dataKey="quantitySold" fill="#d0ed57" name="Unidades Vendidas" /></BarChart>;
+                            chartContent = <BarChart data={dashboardData.topSellingProducts} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} allowDecimals={false} /><YAxis dataKey="name" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={120} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Unidades Vendidas"]} /><Bar dataKey="quantitySold" fill="#c53030" name="Unidades Vendidas" /></BarChart>;
                             break;
                         case 'topSellingServices':
-                            chartContent = <BarChart data={dashboardData.topSellingServices} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} allowDecimals={false} /><YAxis dataKey="name" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={120} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Vezes Realizado"]} /><Bar dataKey="quantitySold" fill="#8884d8" name="Vezes Realizado" /></BarChart>;
+                            chartContent = <BarChart data={dashboardData.topSellingServices} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} allowDecimals={false} /><YAxis dataKey="name" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={120} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Vezes Realizado"]} /><Bar dataKey="quantitySold" fill="#9B2C2C" name="Vezes Realizado" /></BarChart>;
                             break;
                         case 'topStock':
-                            chartContent = <BarChart data={dashboardData.maisEstoque} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis dataKey="nome" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={100} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Estoque"]} /><Bar dataKey="emEstoque" fill="#8884d8" name="Em Estoque" /></BarChart>;
+                            chartContent = <BarChart data={dashboardData.maisEstoque} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis dataKey="nome" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={100} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Estoque"]} /><Bar dataKey="emEstoque" fill="#c53030" name="Em Estoque" /></BarChart>;
                             break;
                         case 'lowStock':
-                            chartContent = <BarChart data={dashboardData.menosEstoque} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis dataKey="nome" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={100} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Estoque"]} /><Bar dataKey="emEstoque" fill="#82ca9d" name="Em Estoque" /></BarChart>;
+                            chartContent = <BarChart data={dashboardData.menosEstoque} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}><CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? "#4A5568" : "#E2E8F0"} /><XAxis type="number" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} /><YAxis dataKey="nome" type="category" stroke={theme === 'dark' ? "#A0AEC0" : "#4A5568"} width={100} tick={{ fontSize: 12 }} /><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} labelStyle={{ color: theme === 'dark' ? '#E2E8F0' : '#1A202C' }} formatter={(value) => [value, "Estoque"]} /><Bar dataKey="emEstoque" fill="#9B2C2C" name="Em Estoque" /></BarChart>;
                             break;
                         case 'category':
                             chartContent = <PieChart><Pie data={dashboardData.categoriaDistribution} cx="50%" cy="50%" labelLine={false} outerRadius={80} fill="#8884d8" dataKey="value" nameKey="name" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>{dashboardData.categoriaDistribution.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}</Pie><Tooltip contentStyle={{ backgroundColor: theme === 'dark' ? '#1A202C' : '#FFFFFF', border: `1px solid ${theme === 'dark' ? '#4A5568' : '#CBD5E0'}` }} /><Legend /></PieChart>;
@@ -1193,15 +1195,15 @@ const AdminPage = ({ onLogout, currentUser }) => {
             <Modal isOpen={reprintingSale !== null} onClose={handleCloseReprintModal}>
                 {reprintingSale && (
                     <>
-                        <h2 className="text-2xl font-bold text-center text-blue-600 dark:text-blue-400 mb-4">Reimpressão de Recibo</h2>
+                        <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-4">Reimpressão de Recibo</h2>
                         <div className="bg-white rounded-lg overflow-y-auto max-h-[60vh]">
-                            <ReciboVenda saleDetails={reprintingSale} />
+                            <ReciboVenda sale={reprintingSale} />
                         </div>
                         <div className="mt-6 flex flex-col sm:flex-row justify-end gap-4">
                             <button onClick={handleWhatsAppRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-full transition-colors">
                                 <Send size={18} /> Enviar por WhatsApp
                             </button>
-                            <button onClick={handlePrintRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full transition-colors">
+                            <button onClick={handlePrintRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full transition-colors">
                                 <Printer size={18} /> Imprimir / Salvar PDF
                             </button>
                             <button onClick={handlePrintThermalRecibo} className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white font-medium rounded-full transition-colors">
