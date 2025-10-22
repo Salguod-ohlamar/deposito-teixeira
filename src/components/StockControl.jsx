@@ -675,7 +675,7 @@ const StockControl = ({ onLogout, currentUser }) => {
       {/* Modal para Editar Serviço */}
       <Modal isOpen={isEditServicoModalOpen} onClose={handleCloseEditServicoModal}>
         <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Serviço</h2>
-        {editingServico && ( // Ensure editingServico is not null
+        {editingServico && (
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" onSubmit={(e) => handleUpdateServico(e, currentUser.name)}>
             <div className="md:col-span-2">
               <label htmlFor="servico-edit-servico" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Serviço</label>
