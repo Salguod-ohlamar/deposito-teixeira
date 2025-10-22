@@ -421,17 +421,17 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
     try {
         const query = `
             UPDATE products SET
-                nome = $1, categoria = $2, marca = $3, fornecedor = $4, em_estoque = $5, qtda_minima = $6, is_offer = $15,
+                nome = $1, categoria = $2, marca = $3, fornecedor = $4, em_estoque = $5, qtda_minima = $6,
                 preco = $7, preco_final = $8, markup = $9, imagem = $10, destaque = $11, tempo_de_garantia = $12,
-                historico = $13, updated_at = NOW()
-            WHERE id = $14
+                historico = $13, is_offer = $14, updated_at = NOW()
+            WHERE id = $15
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), !!is_offer,
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
             parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
-            JSON.stringify(historico),
-            id
+            JSON.stringify(historico), !!is_offer,
+            id,
         ];
 
         const { rows } = await db.query(query, values);
