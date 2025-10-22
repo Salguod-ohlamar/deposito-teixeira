@@ -453,7 +453,7 @@ const StockControl = ({ onLogout, currentUser }) => {
       {/* Modal para Adicionar Novo Produto */}
       <Modal isOpen={isAddModalOpen} onClose={handleCloseAddModal}>
         <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Adicionar Novo Produto</h2>
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" onSubmit={(e) => handleAddProduct(e, currentUser.name)}>
+        <form className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4" onSubmit={(e) => handleAddProduct(e, currentUser.name)}>
             <div className="md:col-span-2">
                 <label htmlFor="add-nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Produto</label>
                 <input id="add-nome" name="nome" type="text" value={newProduct.nome} onChange={handleInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
@@ -497,19 +497,19 @@ const StockControl = ({ onLogout, currentUser }) => {
                 <input id="add-imagem" name="imagem" type="file" accept="image/*" onChange={handleInputChange} className="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
                 {newProduct.imagem && <img src={newProduct.imagem} alt="Pré-visualização" className="mt-4 w-24 h-24 object-cover rounded-lg shadow-md" />}
             </div>
-            <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+            <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                 <label htmlFor="add-destaque" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                     <input id="add-destaque" name="destaque" type="checkbox" checked={newProduct.destaque} onChange={handleInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                     Mostrar produto na página inicial
                 </label>
             </div>
-            <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+            <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                 <label htmlFor="add-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                     <input id="add-is_offer" name="is_offer" type="checkbox" checked={newProduct.is_offer} onChange={handleInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                     Marcar como Oferta
                 </label>
             </div>
-            <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
+            <hr className="md:col-span-3 border-gray-300 dark:border-gray-700 my-2" />
             <div>
                 <label htmlFor="add-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
                 <input id="add-preco" name="preco" type="number" step="0.01" value={newProduct.preco} onChange={handleInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ex: 50.00" />
@@ -518,11 +518,11 @@ const StockControl = ({ onLogout, currentUser }) => {
                 <label htmlFor="add-markup" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Markup (%)</label>
                 <input id="add-markup" name="markup" type="number" step="0.01" placeholder="Ex: 25" value={newProduct.markup} onChange={handleInputChange} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
             </div>
-            <div className="md:col-span-2">
+            <div>
                 <label htmlFor="add-precoFinal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço Final (Venda)</label>
                 <input id="add-precoFinal" name="precoFinal" type="number" step="0.01" value={newProduct.precoFinal} onChange={handleInputChange} required disabled={!!newProduct.markup} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:cursor-not-allowed" />
             </div>
-            <button type="submit" className="w-full md:col-span-2 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
+            <button type="submit" className="w-full md:col-span-3 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
                 Salvar Produto
             </button>
         </form>
@@ -532,7 +532,7 @@ const StockControl = ({ onLogout, currentUser }) => {
       <Modal isOpen={isEditModalOpen} onClose={handleCloseEditModal}>
         <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Produto</h2>
         {editingProduct && (
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" onSubmit={(e) => handleUpdateProduct(e, currentUser.name)}>
+            <form className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4" onSubmit={(e) => handleUpdateProduct(e, currentUser.name)}>
                 <div className="md:col-span-2">
                     <label htmlFor="edit-nome" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Produto</label>
                     <input id="edit-nome" name="nome" type="text" value={editingProduct.nome} onChange={handleEditInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
@@ -576,19 +576,19 @@ const StockControl = ({ onLogout, currentUser }) => {
                     <input id="edit-imagem" name="imagem" type="file" accept="image/*" onChange={handleEditInputChange} className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
                     {editingProduct.imagem && <img src={editingProduct.imagem} alt="Pré-visualização" className="mt-4 w-24 h-24 object-cover rounded-lg shadow-md" />}
                 </div>
-                <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+                <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                     <label htmlFor="edit-destaque" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                         <input id="edit-destaque" name="destaque" type="checkbox" checked={editingProduct.destaque} onChange={handleEditInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                         Mostrar produto na página inicial
                     </label>
                 </div>
-                 <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+                 <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                     <label htmlFor="edit-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                         <input id="edit-is_offer" name="is_offer" type="checkbox" checked={editingProduct.is_offer} onChange={handleEditInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                         Marcar como Oferta
                     </label>
                 </div>
-                <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
+                <hr className="md:col-span-3 border-gray-300 dark:border-gray-700 my-2" />
                 <div>
                     <label htmlFor="edit-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
                     <input id="edit-preco" name="preco" type="number" step="0.01" value={editingProduct.preco} onChange={handleEditInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ex: 50.00" />
@@ -597,11 +597,11 @@ const StockControl = ({ onLogout, currentUser }) => {
                     <label htmlFor="edit-markup" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Markup (%)</label>
                     <input id="edit-markup" name="markup" type="number" step="0.01" placeholder="Ex: 25" value={editingProduct.markup} onChange={handleEditInputChange} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
                 </div>
-                <div className="md:col-span-2">
+                <div>
                     <label htmlFor="edit-precoFinal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço Final (Venda)</label>
                     <input id="edit-precoFinal" name="precoFinal" type="number" step="0.01" value={editingProduct.precoFinal} onChange={handleEditInputChange} required disabled={!!editingProduct.markup} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:cursor-not-allowed" />
                 </div>
-                <button type="submit" className="w-full md:col-span-2 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
+                <button type="submit" className="w-full md:col-span-3 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
                     Salvar Alterações
                 </button>
             </form>
@@ -611,7 +611,7 @@ const StockControl = ({ onLogout, currentUser }) => {
       {/* Modal para Adicionar Novo Serviço */}
       <Modal isOpen={isAddServicoModalOpen} onClose={handleCloseAddServicoModal}>
         <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Adicionar Novo Serviço</h2>
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" onSubmit={handleAddNewServico}>
+        <form className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4" onSubmit={handleAddNewServico}>
           <div className="md:col-span-2">
             <label htmlFor="servico-add-servico" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Serviço</label>
             <input id="servico-add-servico" name="servico" type="text" value={newServico.servico} onChange={handleServicoInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
@@ -641,19 +641,19 @@ const StockControl = ({ onLogout, currentUser }) => {
             <input id="servico-add-imagem" name="imagem" type="file" accept="image/*" onChange={handleServicoInputChange} className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
             {newServico.imagem && <img src={newServico.imagem} alt="Pré-visualização" className="mt-4 w-24 h-24 object-cover rounded-lg shadow-md" />}
           </div>
-          <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+           <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
             <label htmlFor="servico-destaque" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
               <input id="servico-destaque" name="destaque" type="checkbox" checked={newServico.destaque} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
               Mostrar serviço na página inicial
             </label>
            </div>
-           <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+           <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
              <label htmlFor="servico-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                <input id="servico-is_offer" name="is_offer" type="checkbox" checked={newServico.is_offer} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                Marcar como Oferta
              </label>
           </div>
-          <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
+          <hr className="md:col-span-3 border-gray-300 dark:border-gray-700 my-2" />
           <div>
             <label htmlFor="servico-add-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
             <input id="servico-add-preco" name="preco" type="number" step="0.01" value={newServico.preco} onChange={handleServicoInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ex: 300.00" />
@@ -662,11 +662,11 @@ const StockControl = ({ onLogout, currentUser }) => {
             <label htmlFor="servico-add-markup" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Markup (%)</label>
             <input id="servico-add-markup" name="markup" type="number" step="0.01" placeholder="Ex: 100" value={newServico.markup} onChange={handleServicoInputChange} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
           </div>
-          <div className="md:col-span-2">
+          <div>
             <label htmlFor="servico-add-precoFinal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço Final (Cobrado)</label>
             <input id="servico-add-precoFinal" name="precoFinal" type="number" step="0.01" value={newServico.precoFinal} onChange={handleServicoInputChange} required disabled={!!newServico.markup} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:cursor-not-allowed" />
           </div>
-          <button type="submit" className="w-full md:col-span-2 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
+          <button type="submit" className="w-full md:col-span-3 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
             Salvar Serviço
           </button>
         </form>
@@ -676,7 +676,7 @@ const StockControl = ({ onLogout, currentUser }) => {
       <Modal isOpen={isEditServicoModalOpen} onClose={handleCloseEditServicoModal}>
         <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">Editar Serviço</h2>
         {editingServico && (
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4" onSubmit={(e) => handleUpdateServico(e, currentUser.name)}>
+          <form className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4" onSubmit={(e) => handleUpdateServico(e, currentUser.name)}>
             <div className="md:col-span-2">
               <label htmlFor="servico-edit-servico" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Serviço</label>
               <input id="servico-edit-servico" name="servico" type="text" value={editingServico.servico} onChange={handleServicoInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
@@ -706,19 +706,19 @@ const StockControl = ({ onLogout, currentUser }) => {
               <input id="servico-edit-imagem" name="imagem" type="file" accept="image/*" onChange={handleServicoInputChange} className="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 cursor-pointer" />
               {editingServico.imagem && <img src={editingServico.imagem} alt="Pré-visualização" className="mt-4 w-24 h-24 object-cover rounded-lg shadow-md" />}
             </div>
-            <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+             <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
               <label htmlFor="servico-edit-destaque" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                 <input id="servico-edit-destaque" name="destaque" type="checkbox" checked={editingServico.destaque} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                 Mostrar serviço na página inicial
               </label>
              </div>
-             <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+             <div className="md:col-span-3 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
                <label htmlFor="servico-edit-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
                  <input id="servico-edit-is_offer" name="is_offer" type="checkbox" checked={editingServico.is_offer} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                  Marcar como Oferta
                </label>
             </div>
-            <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
+            <hr className="md:col-span-3 border-gray-300 dark:border-gray-700 my-2" />
             <div>
               <label htmlFor="servico-edit-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
               <input id="servico-edit-preco" name="preco" type="number" step="0.01" value={editingServico.preco} onChange={handleServicoInputChange} required className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Ex: 300.00" />
@@ -727,11 +727,11 @@ const StockControl = ({ onLogout, currentUser }) => {
               <label htmlFor="servico-edit-markup" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Markup (%)</label>
               <input id="servico-edit-markup" name="markup" type="number" step="0.01" placeholder="Ex: 100" value={editingServico.markup} onChange={handleServicoInputChange} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
             </div>
-            <div className="md:col-span-2">
+            <div>
               <label htmlFor="servico-edit-precoFinal" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço Final (Cobrado)</label>
               <input id="servico-edit-precoFinal" name="precoFinal" type="number" step="0.01" value={editingServico.precoFinal} onChange={handleServicoInputChange} required disabled={!!editingServico.markup} className="mt-1 block w-full p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:cursor-not-allowed" />
             </div>
-            <button type="submit" className="w-full md:col-span-2 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
+            <button type="submit" className="w-full md:col-span-3 mt-4 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-300">
               Salvar Alterações
             </button>
           </form>

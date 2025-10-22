@@ -154,17 +154,17 @@ app.put('/api/services/:id', protect, hasPermission('editService'), async (req, 
     try {
         const query = `
             UPDATE services SET
-                servico = $1, fornecedor = $2, marca = $3, tipo_reparo = $4, tecnico = $5, is_offer = $14,
+                servico = $1, fornecedor = $2, marca = $3, tipo_reparo = $4, tecnico = $5,
                 preco = $6, preco_final = $7, markup = $8, imagem = $9, destaque = $10, tempo_de_garantia = $11,
-                historico = $12, updated_at = NOW()
-            WHERE id = $13
+                historico = $12, is_offer = $13, updated_at = NOW()
+            WHERE id = $14
             RETURNING *;
         `;
         const values = [
-            servico, fornecedor, marca, tipoReparo, tecnico, !!is_offer,
+            servico, fornecedor, marca, tipoReparo, tecnico,
             parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
-            JSON.stringify(historico),
-            id
+            JSON.stringify(historico), !!is_offer,
+            id,
         ];
 
         const { rows } = await db.query(query, values);
@@ -421,17 +421,17 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
     try {
         const query = `
             UPDATE products SET
-                nome = $1, categoria = $2, marca = $3, fornecedor = $4, em_estoque = $5, qtda_minima = $6, 
-                preco = $7, preco_final = $8, markup = $9, imagem = $10, destaque = $11, tempo_de_garantia = $12, 
-                historico = $13, is_offer = $14, updated_at = NOW() 
-            WHERE id = $15 
+                nome = $1, categoria = $2, marca = $3, fornecedor = $4, em_estoque = $5, qtda_minima = $6,
+                preco = $7, preco_final = $8, markup = $9, imagem = $10, destaque = $11, tempo_de_garantia = $12,
+                historico = $13, is_offer = $14, updated_at = NOW()
+            WHERE id = $15
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10), 
-            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, 
-            JSON.stringify(historico), !!is_offer, 
-            id, 
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
+            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            JSON.stringify(historico), !!is_offer,
+            id,
         ];
 
         const { rows } = await db.query(query, values);
