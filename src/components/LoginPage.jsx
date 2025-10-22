@@ -45,16 +45,13 @@ const LoginPage = ({ onLogin, handlePasswordRecovery }) => {
      * Manipula a submissão do formulário de recuperação de senha.
      * @param {React.FormEvent} e - O evento do formulário.
      */
-    const handleRecoverSubmit = async (e) => {
+    const handleRecoverClick = (e) => {
         e.preventDefault();
-        if (!recoverEmail || !recoverName) {
-            toast.error('Por favor, preencha e-mail e nome.');
-            return;
-        }
-        const success = await handlePasswordRecovery(recoverEmail, recoverName);
-        if (success) {
-            setModalView('login');
-        }
+        const phoneNumber = "5511912957662";
+        const message = "Oi, eu acabei esquecendo a minha senha e preciso que ela seja resetada, você pode me ajudar?";
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank', 'noopener,noreferrer');
+        toast.success('Você será redirecionado para o WhatsApp.');
     };
 
     if (modalView === 'login') {
@@ -82,17 +79,11 @@ const LoginPage = ({ onLogin, handlePasswordRecovery }) => {
     return (
         <>
             <h2 className="text-2xl font-bold text-center text-red-700 mb-6">Recuperar Senha</h2>
-            <form className="space-y-4" onSubmit={handleRecoverSubmit}>
-                <div>
-                    <label htmlFor="email-recover" className="block text-sm font-medium text-gray-700">Email Cadastrado</label>
-                    <input id="email-recover" type="email" value={recoverEmail} onChange={e => setRecoverEmail(e.target.value)} required className="mt-1 block w-full p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
-                </div>
-                <div>
-                    <label htmlFor="name-recover" className="block text-sm font-medium text-gray-700">Nome Completo</label>
-                    <input id="name-recover" type="text" value={recoverName} onChange={e => setRecoverName(e.target.value)} required className="mt-1 block w-full p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
-                </div>
-                <button type="submit" className="w-full mt-4 px-4 py-3 bg-red-700 hover:bg-red-800 text-white font-bold rounded-lg transition-colors duration-300">Recuperar</button>
-            </form>
+            <div className="text-center space-y-4">
+                <p className="text-gray-600">Para resetar sua senha, por favor, entre em contato conosco diretamente pelo WhatsApp.</p>
+                <p className="text-gray-600">Nossa equipe irá te ajudar a recuperar seu acesso de forma rápida e segura.</p>
+                <button onClick={handleRecoverClick} className="w-full mt-4 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-colors duration-300">Falar no WhatsApp</button>
+            </div>
             <div className="text-center mt-4">
                 <button onClick={() => setModalView('login')} className="text-sm text-gray-500 hover:text-gray-700 hover:underline">Voltar para o login</button>
             </div>
