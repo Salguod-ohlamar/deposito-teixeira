@@ -56,16 +56,20 @@ export const categories = [
 /**
  * Grade de categorias de produtos com imagens e links.
  */
-const  CategoryGrid = () => {
+const  CategoryGrid = ({ onCategoryClick }) => {
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map(cat => (
-                <Link to={`/categoria/${encodeURIComponent(cat.name)}`} key={cat.name} className="group block text-center">
+                <button 
+                    key={cat.name} 
+                    onClick={() => onCategoryClick(cat.name)}
+                    className="group block text-center p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                >
                     <div className="overflow-hidden rounded-lg">
                         <img src={cat.img} alt={cat.name} className="w-full h-48 object-cover transition-transform duration-300" />
                     </div>
-                    <h3 className="mt-3 font-semibold text-gray-800 dark:text-gray-200 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors">{cat.name}</h3>
-                </Link>
+                    <h3 className="mt-3 font-semibold text-gray-800 dark:text-gray-200 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">{cat.name}</h3>
+                </button>
             ))}
         </div>
     );
@@ -106,11 +110,15 @@ const BrandsSection = () => {
  */
 const HomePage = ({ onLoginClick }) => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
+    const [allProducts, setAllProducts] = useState([]);
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLgpdModalOpen, setIsLgpdModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [viewingCategory, setViewingCategory] = useState(null);
+    const [productsForModal, setProductsForModal] = useState([]);
 
     const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -129,12 +137,13 @@ const HomePage = ({ onLoginClick }) => {
                 const productsResponse = await fetch(`${API_URL}/api/products`);
                 if (!productsResponse.ok) throw new Error('Falha ao buscar produtos.');
                 const products = await productsResponse.json();
+                setAllProducts(products);
 
                 // Filtra produtos que são destaque E pertencem a uma das categorias principais
                 const categoryNames = new Set(categories.map(c => c.name));
                 const featured = products.filter(p => p.destaque === true && categoryNames.has(p.categoria));
                 setFeaturedProducts(featured);
-
+                
             } catch (error) {
                 console.error("Erro ao carregar dados da página inicial:", error);
                 setFeaturedProducts([]);
@@ -170,6 +179,16 @@ const HomePage = ({ onLoginClick }) => {
         // Ex: navigate(`/busca?q=${searchTerm}`);
     };
 
+    const handleCategoryClick = (categoryName) => {
+        const productsInCategory = allProducts.filter(p => p.categoria === categoryName);
+        setProductsForModal(productsInCategory);
+        setViewingCategory(categoryName);
+        setIsCategoryModalOpen(true);
+    };
+    const handleCloseCategoryModal = () => {
+        setIsCategoryModalOpen(false);
+    };
+    
     return (
         <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
             <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
@@ -221,28 +240,24 @@ const HomePage = ({ onLoginClick }) => {
                 <section id="categorias" className="py-24">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Navegue por Categorias</h2>
-                        <CategoryGrid />
+                        <CategoryGrid onCategoryClick={handleCategoryClick} />
                     </div>
                 </section>
 
                 <section id="ofertas" className="py-24 bg-gray-100 dark:bg-gray-900">
                     <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Ofertas em Destaque</h2>
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Ofertas em Destaque</h2>
+                        </div>
                         {loading ? (
                             <div className="text-center text-lg text-gray-500 dark:text-gray-400">Carregando ofertas...</div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {featuredProducts.length > 0 ? (
                                     featuredProducts.map(product => (
-                                        <ProductCard 
-                                            key={product.id} 
-                                            product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} 
-                                            onComprarClick={handleComprarClick} 
-                                        />
+                                        <ProductCard key={product.id} product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} onComprarClick={handleComprarClick} />
                                     ))
-                                ) : (
-                                    <p className="col-span-full text-center text-gray-500 dark:text-gray-500">Nenhuma oferta em destaque no momento.</p>
-                                )}
+                                ) : (<p className="col-span-full text-center text-gray-500 dark:text-gray-500">Nenhuma oferta encontrada para esta categoria.</p>)}
                             </div>
                         )}
                     </div>
@@ -289,6 +304,23 @@ const HomePage = ({ onLoginClick }) => {
             </footer>
 
             <WhatsAppButton phoneNumber="5511941341795" message="Olá! Gostaria de mais informações sobre seus produtos." />
+
+            <Modal isOpen={isCategoryModalOpen} onClose={handleCloseCategoryModal} size="2xl">
+                <h2 className="text-2xl font-bold text-center text-red-600 dark:text-red-500 mb-6">{viewingCategory}</h2>
+                <div className="max-h-[70vh] overflow-y-auto pr-4">
+                    {productsForModal.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {productsForModal.map(product => (
+                                <ProductCard 
+                                    key={product.id} 
+                                    product={{ type: 'produto', id: product.id, name: product.nome, price: product.precoFinal, image: product.imagem, description: `Marca: ${product.marca}` }} 
+                                    onComprarClick={handleComprarClick} 
+                                />
+                            ))}
+                        </div>
+                    ) : (<p className="text-center text-gray-500 py-16">Nenhum produto encontrado nesta categoria.</p>)}
+                </div>
+            </Modal>
 
             <Modal isOpen={isLgpdModalOpen} onClose={() => setIsLgpdModalOpen(false)} size="lg">
                 <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">Política de Privacidade e Proteção de Dados (LGPD)</h2>
