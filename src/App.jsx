@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { usePersistedState } from './components/usePersistedState';
 import { ThemeProvider } from './components/ThemeContext.jsx';
-import { EstoqueProvider, useEstoqueContext } from './components/EstoqueContext.jsx';
+import { EstoqueProvider, useEstoqueContext, PERMISSION_GROUPS } from './components/EstoqueContext.jsx';
 import LoginPage from './components/LoginPage.jsx';
 import Modal from './components/Modal.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
@@ -13,7 +13,6 @@ const HomePage = lazy(() => import('./HomePage.jsx'));
 const StockControl = lazy(() => import('./components/StockControl.jsx'));
 const VendasPage = lazy(() => import('./components/VendasPage.jsx'));
 const ClientesPage = lazy(() => import('./components/ClientesPage.jsx'));
-import { useEstoqueContext, PERMISSION_GROUPS } from './components/useEstoque.jsx';
 const AdminPage = lazy(() => import('./AdminPage.jsx'));
 
 const AppContent = () => {
