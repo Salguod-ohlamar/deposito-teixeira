@@ -431,7 +431,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
             parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
             JSON.stringify(historico), !!is_offer,
-            id,
+            id
         ];
 
         const { rows } = await db.query(query, values);
