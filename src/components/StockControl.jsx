@@ -503,6 +503,12 @@ const StockControl = ({ onLogout, currentUser }) => {
                     Mostrar produto na página inicial
                 </label>
             </div>
+            <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+                <label htmlFor="add-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <input id="add-is_offer" name="is_offer" type="checkbox" checked={newProduct.is_offer} onChange={handleInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
+                    Marcar como Oferta
+                </label>
+            </div>
             <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
             <div>
                 <label htmlFor="add-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
@@ -576,6 +582,12 @@ const StockControl = ({ onLogout, currentUser }) => {
                         Mostrar produto na página inicial
                     </label>
                 </div>
+                 <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+                    <label htmlFor="edit-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input id="edit-is_offer" name="is_offer" type="checkbox" checked={editingProduct.is_offer} onChange={handleEditInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
+                        Marcar como Oferta
+                    </label>
+                </div>
                 <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
                 <div>
                     <label htmlFor="edit-preco" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Preço de Custo</label>
@@ -634,6 +646,12 @@ const StockControl = ({ onLogout, currentUser }) => {
               <input id="servico-destaque" name="destaque" type="checkbox" checked={newServico.destaque} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
               Mostrar serviço na página inicial
             </label>
+           </div>
+           <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+             <label htmlFor="servico-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+               <input id="servico-is_offer" name="is_offer" type="checkbox" checked={newServico.is_offer} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
+               Marcar como Oferta
+             </label>
           </div>
           <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
           <div>
@@ -693,6 +711,12 @@ const StockControl = ({ onLogout, currentUser }) => {
                 <input id="servico-edit-destaque" name="destaque" type="checkbox" checked={editingServico.destaque} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                 Mostrar serviço na página inicial
               </label>
+             </div>
+             <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
+               <label htmlFor="servico-edit-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+                 <input id="servico-edit-is_offer" name="is_offer" type="checkbox" checked={editingServico.is_offer} onChange={handleServicoInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
+                 Marcar como Oferta
+               </label>
             </div>
             <hr className="md:col-span-2 border-gray-300 dark:border-gray-700 my-2" />
             <div>

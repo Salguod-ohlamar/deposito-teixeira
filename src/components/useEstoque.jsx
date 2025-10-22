@@ -181,7 +181,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
-    const [newProduct, setNewProduct] = useState({ nome: '', categoria: '', marca: '', fornecedor: '', emEstoque: '', qtdaMinima: '', preco: '', markup: '', precoFinal: '', imagem: '', destaque: true, tempoDeGarantia: '' });
+    const [newProduct, setNewProduct] = useState({ nome: '', categoria: '', marca: '', fornecedor: '', emEstoque: '', qtdaMinima: '', preco: '', markup: '', precoFinal: '', imagem: '', destaque: true, is_offer: false, tempoDeGarantia: '' });
 
     // UI states
     const [searchTerm, setSearchTerm] = useState('');
@@ -224,7 +224,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const [isAddServicoModalOpen, setIsAddServicoModalOpen] = useState(false);
     const [isEditServicoModalOpen, setIsEditServicoModalOpen] = useState(false);
     const [editingServico, setEditingServico] = useState(null);
-    const [newServico, setNewServico] = useState({ servico: '', fornecedor: '', marca: '', tipoReparo: '', tecnico: '', preco: '', precoFinal: '', imagem: '', markup: '', destaque: true, tempoDeGarantia: '' });
+    const [newServico, setNewServico] = useState({ servico: '', fornecedor: '', marca: '', tipoReparo: '', tecnico: '', preco: '', precoFinal: '', imagem: '', markup: '', destaque: true, is_offer: false, tempoDeGarantia: '' });
 
     const [servicoSearchTerm, setServicoSearchTerm] = useState('');
     const [servicoSortConfig, setServicoSortConfig] = useState({ key: 'servico', direction: 'ascending' });
@@ -416,11 +416,11 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const handleOpenAddModal = () => setIsAddModalOpen(true);
     const handleCloseAddModal = () => {
         setIsAddModalOpen(false);
-        setNewProduct({ nome: '', categoria: '', marca: '', fornecedor: '', emEstoque: '', qtdaMinima: '', preco: '', markup: '', precoFinal: '', imagem: '', destaque: true, tempoDeGarantia: '' });
+        setNewProduct({ nome: '', categoria: '', marca: '', fornecedor: '', emEstoque: '', qtdaMinima: '', preco: '', markup: '', precoFinal: '', imagem: '', destaque: true, is_offer: false, tempoDeGarantia: '' });
     };
 
     const handleOpenEditModal = (product) => {
-        setEditingProduct({ ...product, markup: product.markup || '', imagem: product.imagem || '', historico: product.historico || [], categoria: product.categoria || '', destaque: product.destaque ?? false, tempoDeGarantia: product.tempoDeGarantia || '' });
+        setEditingProduct({ ...product, markup: product.markup || '', imagem: product.imagem || '', historico: product.historico || [], categoria: product.categoria || '', destaque: product.destaque ?? false, is_offer: product.is_offer ?? false, tempoDeGarantia: product.tempoDeGarantia || '' });
         setIsEditModalOpen(true);
     };
 
@@ -733,7 +733,7 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     const handleOpenAddServicoModal = () => setIsAddServicoModalOpen(true);
     const handleCloseAddServicoModal = () => {
         setIsAddServicoModalOpen(false);
-        setNewServico({ servico: '', fornecedor: '', marca: '', tipoReparo: '', tecnico: '', preco: '', precoFinal: '', imagem: '', markup: '', destaque: true });
+        setNewServico({ servico: '', fornecedor: '', marca: '', tipoReparo: '', tecnico: '', preco: '', precoFinal: '', imagem: '', markup: '', destaque: true, is_offer: false, tempoDeGarantia: '' });
     };
 
     const handleOpenEditServicoModal = (servico) => {

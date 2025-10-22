@@ -110,6 +110,7 @@ const BrandsSection = () => {
 const HomePage = ({ onLoginClick }) => {
     const [featuredProducts, setFeaturedProducts] = useState([]);
     const [allProducts, setAllProducts] = useState([]);
+    const [offerProducts, setOfferProducts] = useState([]);
     const [banners, setBanners] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -135,12 +136,16 @@ const HomePage = ({ onLoginClick }) => {
                 const productsResponse = await fetch(`${API_URL}/api/products`);
                 if (!productsResponse.ok) throw new Error('Falha ao buscar produtos.');
                 const products = await productsResponse.json();
+
+                const servicesResponse = await fetch(`${API_URL}/api/services`);
+                if (!servicesResponse.ok) throw new Error('Falha ao buscar serviços.');
+                const services = await servicesResponse.json();
+
                 setAllProducts(products);
 
-                // Filtra produtos que são destaque E pertencem a uma das categorias principais
-                const categoryNames = new Set(categories.map(c => c.name));
-                const featured = products.filter(p => p.destaque === true && categoryNames.has(p.categoria));
-                setFeaturedProducts(featured);
+                const allItems = [...products.map(p => ({...p, type: 'produto'})), ...services.map(s => ({...s, type: 'serviço'}))];
+                const offers = allItems.filter(item => item.is_offer);
+                setOfferProducts(offers);
                 
             } catch (error) {
                 console.error("Erro ao carregar dados da página inicial:", error);
@@ -220,10 +225,25 @@ const HomePage = ({ onLoginClick }) => {
                     </div>
                 </section>
 
-                <section id="ofertas" className="py-24 bg-gray-100 dark:bg-gray-900">
+                <section id="ofertas" className="pt-24 bg-gray-100 dark:bg-gray-900">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">Nossas Ofertas</h2>
-                        <BannerCarousel banners={banners} />
+                        {loading ? (
+                            <p className="text-center">Carregando ofertas...</p>
+                        ) : offerProducts.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                {offerProducts.map(item => (
+                                    <ProductCard 
+                                        key={`${item.type}-${item.id}`} 
+                                        product={{
+                                            ...item,
+                                            name: item.nome || item.servico,
+                                            price: item.precoFinal
+                                        }} 
+                                        onComprarClick={handleComprarClick} />
+                                ))}
+                            </div>
+                        ) : (<p className="text-center text-gray-500">Nenhuma oferta especial no momento. Volte em breve!</p>)}
                     </div>
                 </section>
 
