@@ -409,7 +409,7 @@ app.post('/api/products', protect, hasPermission('addProduct'), async (req, res)
 app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, res) => {
     const { id } = req.params;
     const {
-        nome, categoria, marca, fornecedor, emEstoque, qtdaMinima,
+        nome, categoria, marca, fornecedor, emEstoque, em_estoque, qtdaMinima,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
 
@@ -423,7 +423,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             RETURNING *;
         `;
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque, 10), parseInt(qtdaMinima, 10),
+            nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
             parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
             JSON.stringify(historico),
             id
