@@ -90,7 +90,6 @@ const AdminPage = ({ onLogout, currentUser }) => {
     const [isUserSalesReportModalOpen, setIsUserSalesReportModalOpen] = useState(false);
     const [isDreModalOpen, setIsDreModalOpen] = useState(false);
     const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
-    const [isBannerModalOpen, setIsBannerModalOpen] = useState(false); 
     const [isChartsModalOpen, setIsChartsModalOpen] = useState(false);
     const [newUserData, setNewUserData] = useState({ name: '', email: '', password: '', title: 'Vendedor', role: 'user', permissions: getDefaultPermissions('user') });
     const [editingUser, setEditingUser] = useState(null);
