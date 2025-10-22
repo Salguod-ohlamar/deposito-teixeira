@@ -1,8 +1,7 @@
 //HomePge.jsx
 
 import React, { useState, useEffect } from 'react';
-import { User, Menu, X, Search, Phone, MapPin, MessageCircle, ShoppingCart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { User, Menu, X, Phone, MapPin, MessageCircle } from 'lucide-react';
 
 import Button from './components/Button.jsx';
 import ProductCard from './components/ProductCard.jsx';
@@ -115,7 +114,6 @@ const HomePage = ({ onLoginClick }) => {
     const [loading, setLoading] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLgpdModalOpen, setIsLgpdModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [viewingCategory, setViewingCategory] = useState(null);
     const [productsForModal, setProductsForModal] = useState([]);
@@ -168,17 +166,6 @@ const HomePage = ({ onLoginClick }) => {
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
-    /**
-     * Manipulador para a submissão do formulário de busca.
-     * @param {React.FormEvent} e - O evento do formulário.
-     */
-    const handleSearch = (e) => {
-        e.preventDefault();
-        alert(`Buscando por: "${searchTerm}"... (funcionalidade a ser implementada)`);
-        // Aqui você pode redirecionar para uma página de resultados de busca
-        // Ex: navigate(`/busca?q=${searchTerm}`);
-    };
-
     const handleCategoryClick = (categoryName) => {
         const productsInCategory = allProducts.filter(p => p.categoria === categoryName);
         setProductsForModal(productsInCategory);
@@ -195,17 +182,6 @@ const HomePage = ({ onLoginClick }) => {
                 {/* <TopBar /> */}
                 <div className="container mx-auto flex items-center justify-between p-4 gap-4">
                     <div className="text-xl lg:text-2xl font-bold tracking-wider text-white whitespace-nowrap"><a href="/">Teixeira Depósito de Materiais</a></div>
-                    
-                    <form onSubmit={handleSearch} className="hidden lg:flex w-full max-w-xl">
-                        <input 
-                            type="text" 
-                            placeholder="O que você está construindo hoje?" 
-                            className="w-full px-4 py-2 border border-r-0 border-gray-300 dark:border-gray-700 rounded-l-md focus:ring-gray-500 focus:border-gray-500 bg-white dark:bg-gray-800"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <Button type="submit" variant="secondary" className="rounded-l-none !rounded-r-md border-gray-300 dark:border-gray-700 bg-white/80 hover:bg-white"><Search size={20} className="text-gray-600" /></Button>
-                    </form>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
                         <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex text-white hover:bg-white/20">
