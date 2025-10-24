@@ -269,7 +269,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
             vendedor: currentUser.name,
         };
 
-        const completeSaleDetails = handleSale ? await handleSale(saleDetails) : null;
+        const completeSaleDetails = await handleSale(saleDetails);
 
         if (completeSaleDetails) {
             setLastSaleDetails(completeSaleDetails);
