@@ -107,7 +107,7 @@ const StockControl = ({ onLogout, currentUser }) => {
   // UI, Filter & Config States
   const [columns, setColumns] = useState(() => {
     try {
-      const savedColumns = localStorage.getItem('boycell-columns');
+      const savedColumns = localStorage.getItem('deposito-teixeira-columns');
       return savedColumns ? JSON.parse(savedColumns) : fallbackInitialColumns;
     } catch (error) {
       console.error("Failed to parse columns from localStorage", error);
@@ -116,7 +116,7 @@ const StockControl = ({ onLogout, currentUser }) => {
   });
   const [servicosColumns, setServicosColumns] = useState(() => {
     try {
-      const saved = localStorage.getItem('boycell-servicos-columns');
+      const saved = localStorage.getItem('deposito-teixeira-servicos-columns');
       return saved ? JSON.parse(saved) : servicosFallbackColumns;
     } catch (error) {
       console.error("Failed to parse servicos columns from localStorage", error);
@@ -125,10 +125,10 @@ const StockControl = ({ onLogout, currentUser }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('boycell-columns', JSON.stringify(columns));
+    localStorage.setItem('deposito-teixeira-columns', JSON.stringify(columns));
   }, [columns]);
   useEffect(() => {
-    localStorage.setItem('boycell-servicos-columns', JSON.stringify(servicosColumns));
+    localStorage.setItem('deposito-teixeira-servicos-columns', JSON.stringify(servicosColumns));
   }, [servicosColumns]);
   useEffect(() => {
     const afterPrint = () => {

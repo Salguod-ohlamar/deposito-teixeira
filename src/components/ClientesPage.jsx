@@ -78,7 +78,7 @@ const ClientesPage = ({ onLogout, currentUser }) => {
 
     const handleEmailRecibo = () => {
         if (!reprintingSale) return;
-        const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerEmail, receiptCode } = reprintingSale;
+        const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerEmail, receiptCode } = reprintingSale; // Removido 'Boycell' do corpo do email
         let emailBody = `Olá, ${customer || 'cliente'},\n\nObrigado pela sua compra na Boycell!\n\nDetalhes da Venda:\nCódigo: ${receiptCode}\nCliente: ${customer}\nCPF/CNPJ: ${customerCpf}\nData: ${new Date(date).toLocaleString('pt-BR')}\n\nItens:\n`;
         items.forEach(item => {
             const itemSubtotal = (item.precoFinal * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -89,17 +89,17 @@ const ClientesPage = ({ onLogout, currentUser }) => {
                 emailBody += `  Garantia até: ${dataGarantia.toLocaleDateString('pt-BR')}\n`;
             }
         });
-        emailBody += `\nSubtotal: ${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
-        if (discountPercentage > 0) emailBody += `Desconto (${discountPercentage}%): -${discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
-        emailBody += `\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\nAtenciosamente,\nEquipe Boycell`;
-        const subject = `Seu Comprovante de Compra - Boycell (Cód: ${receiptCode || 'N/A'})`;
+        emailBody += `\nSubtotal: ${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`; // Mantido o nome da empresa como "Boycell" no email
+        if (discountPercentage > 0) emailBody += `Desconto (${discountPercentage}%): -${discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`; // Mantido o nome da empresa como "Boycell" no email
+        emailBody += `\nTotal: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\nAtenciosamente,\nEquipe Deposito Teixeira`; // Alterado "Equipe Boycell" para "Equipe Deposito Teixeira"
+        const subject = `Seu Comprovante de Compra - Deposito Teixeira (Cód: ${receiptCode || 'N/A'})`; // Alterado "Boycell" para "Deposito Teixeira"
         window.open(`mailto:${customerEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`, '_blank');
     };
-
+    
     const handleWhatsAppRecibo = () => {
         if (!reprintingSale) return;
         const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerPhone, receiptCode } = reprintingSale;
-        let whatsAppText = `*Comprovante de Compra - Boycell*\n\n*Cód. Venda:* ${receiptCode}\n*Cliente:* ${customer}\n*CPF/CNPJ:* ${customerCpf}\n*Data:* ${new Date(date).toLocaleString('pt-BR')}\n\n*Itens:*\n`;
+        let whatsAppText = `*Comprovante de Compra - Deposito Teixeira*\n\n*Cód. Venda:* ${receiptCode}\n*Cliente:* ${customer}\n*CPF/CNPJ:* ${customerCpf}\n*Data:* ${new Date(date).toLocaleString('pt-BR')}\n\n*Itens:*\n`;
         items.forEach(item => {
             const itemSubtotal = (item.precoFinal * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             whatsAppText += `- ${item.nome || item.servico} (x${item.quantity}) - ${itemSubtotal}\n`;

@@ -22,7 +22,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Rota de teste
 app.get('/', (req, res) => {
-  res.send('API Boycell está no ar!');
+  res.send('API Deposito Teixeira está no ar!');
 });
 
 // Rota para buscar todos os produtos

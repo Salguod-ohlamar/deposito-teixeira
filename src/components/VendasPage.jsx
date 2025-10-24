@@ -39,7 +39,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
 
     const [carrinho, setCarrinho] = useState(() => {
         try {
-            const savedCart = localStorage.getItem('boycell-carrinho');
+            const savedCart = localStorage.getItem('deposito-teixeira-carrinho');
             if (savedCart) {
                 const parsed = JSON.parse(savedCart);
                 if (Array.isArray(parsed)) {
@@ -61,7 +61,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
 
     // Salva o carrinho no localStorage sempre que ele for alterado
     useEffect(() => {
-        localStorage.setItem('boycell-carrinho', JSON.stringify(carrinho));
+        localStorage.setItem('deposito-teixeira-carrinho', JSON.stringify(carrinho));
     }, [carrinho]);
 
     const [isReciboModalOpen, setIsReciboModalOpen] = useState(false);
@@ -131,7 +131,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
     const handleCpfBlur = async () => {
         const cleanedCpf = customerCpf.replace(/[^\d]/g, '');
         if (cleanedCpf.length < 11) return;
-
+    
         if (!validateCPF(customerCpf)) {
             setIsCpfValid(false);
             toast.error("CPF/CNPJ inválido.");
@@ -141,7 +141,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
 
         try {
             setIsSearchingClient(true);
-            const token = localStorage.getItem('boycell-token');
+            const token = localStorage.getItem('deposito-teixeira-token');
             const response = await fetch(`${API_URL}/api/clients/search?cpf=${customerCpf}`, {
                 headers: { 'Authorization': `Bearer ${token}` } 
             });
@@ -304,11 +304,11 @@ const VendasPage = ({ onLogout, currentUser }) => {
     const handleWhatsAppRecibo = () => {
         if (!lastSaleDetails) return;
 
-        const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerPhone, receiptCode } = lastSaleDetails;
+        const { items, subtotal, discountPercentage, discountValue, total, date, customer, customerCpf, customerPhone, receiptCode } = lastSaleDetails; // Alterado 'Boycell' para 'Deposito Teixeira'
 
-        let whatsAppText = `*Comprovante de Compra - Boycell*\n\n`;
+        let whatsAppText = `*Comprovante de Compra - Deposito Teixeira*\n\n`;
         if (receiptCode) whatsAppText += `*Cód. Venda:* ${receiptCode}\n`;
-        if (customer) {
+        if (customer) { 
             whatsAppText += `*Cliente:* ${customer}\n`;
         }
         if (customerCpf) {
@@ -330,7 +330,7 @@ const VendasPage = ({ onLogout, currentUser }) => {
             }
         });
         whatsAppText += `\n*Subtotal:* ${subtotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
-        if (discountPercentage > 0) {
+        if (discountPercentage > 0) { 
             whatsAppText += `*Desconto (${discountPercentage}%):* -${discountValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n`;
         }
         whatsAppText += `\n*TOTAL:* ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\n`;

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
+
 import { toast } from 'react-hot-toast';
 
 import { parsePrice } from './formatters.js';
@@ -192,8 +193,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
 
     // State for stock value history
     const [stockValueHistory, setStockValueHistory] = useState(() => {
-        try {
-            const savedHistory = localStorage.getItem('boycell-stockValueHistory');
+        try { // Alterado 'boycell-stockValueHistory' para 'deposito-teixeira-stockValueHistory'
+            const savedHistory = localStorage.getItem('deposito-teixeira-stockValueHistory');
             return savedHistory ? JSON.parse(savedHistory) : [];
         } catch (error) {
             console.error("Erro ao carregar o histórico de valor do localStorage:", error);
@@ -410,14 +411,14 @@ export const useEstoque = (currentUser, setCurrentUser) => {
     // Effect to save stock value history to localStorage
     useEffect(() => {
         if (stockValueHistory.length > 0) {
-            localStorage.setItem('boycell-stockValueHistory', JSON.stringify(stockValueHistory));
+            localStorage.setItem('deposito-teixeira-stockValueHistory', JSON.stringify(stockValueHistory));
         }
     }, [stockValueHistory]);
 
     // Efeito para salvar o log de atividades
     useEffect(() => {
-        try {
-            localStorage.setItem('boycell-activityLog', JSON.stringify(activityLog));
+        try { // Alterado 'boycell-activityLog' para 'deposito-teixeira-activityLog'
+            localStorage.setItem('deposito-teixeira-activityLog', JSON.stringify(activityLog));
         } catch (error) {
             console.error("Erro ao salvar o log de atividades:", error);
         }
@@ -1192,10 +1193,10 @@ export const useEstoque = (currentUser, setCurrentUser) => {
                 salesHistory,
                 clientes,
                 activityLog,
-                stockValueHistory: JSON.parse(localStorage.getItem('boycell-stockValueHistory') || '[]'),
-                columns: JSON.parse(localStorage.getItem('boycell-columns') || 'null'),
-                servicosColumns: JSON.parse(localStorage.getItem('boycell-servicos-columns') || 'null'),
-                chartsConfig: JSON.parse(localStorage.getItem('boycell-chartsConfig') || 'null'),
+                stockValueHistory: JSON.parse(localStorage.getItem('deposito-teixeira-stockValueHistory') || '[]'),
+                columns: JSON.parse(localStorage.getItem('deposito-teixeira-columns') || 'null'),
+                servicosColumns: JSON.parse(localStorage.getItem('deposito-teixeira-servicos-columns') || 'null'),
+                chartsConfig: JSON.parse(localStorage.getItem('deposito-teixeira-chartsConfig') || 'null'),
             };
 
             const jsonString = JSON.stringify(backupData, null, 2);
@@ -1203,8 +1204,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             const date = new Date().toISOString().split('T')[0];
-            link.href = url;
-            link.download = `backup-boycell-${date}.json`;
+            link.href = url; // Alterado o nome do arquivo de backup
+            link.download = `backup-deposito-teixeira-${date}.json`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1222,8 +1223,8 @@ export const useEstoque = (currentUser, setCurrentUser) => {
             
             // AVISO: Esta é uma restauração local e não afeta o banco de dados.
             // Uma restauração completa exigiria endpoints de API para cada tipo de dado.
-            Object.keys(restoredData).forEach(key => {
-                localStorage.setItem(`boycell-${key}`, JSON.stringify(restoredData[key]));
+            Object.keys(restoredData).forEach(key => { // Alterado o prefixo do localStorage
+                localStorage.setItem(`deposito-teixeira-${key}`, JSON.stringify(restoredData[key]));
             });
 
             toast.success('Dados restaurados localmente! A aplicação será recarregada.');

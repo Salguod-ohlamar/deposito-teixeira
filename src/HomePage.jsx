@@ -163,7 +163,7 @@ const HomePage = ({ onLoginClick }) => {
      * @param {object} item - O produto ou serviço a ser comprado.
      */
     const handleComprarClick = (item) => {
-        const phoneNumber = "5511941341795"; // Substitua pelo seu número
+        const phoneNumber = "5511941341795"; // Número de contato do Deposito Teixeira
         const itemName = item.name || item.servico;
         const itemPrice = item.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         const message = `Olá, Teixeira! Tenho interesse no produto "${itemName}" (cód: ${item.id}) no valor de ${itemPrice}. Ele está disponível?`;
