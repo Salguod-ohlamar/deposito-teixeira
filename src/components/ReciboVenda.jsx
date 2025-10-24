@@ -1,9 +1,9 @@
 import React from 'react';
 
-const ReciboVenda = ({ saleDetails }) => {
-    if (!saleDetails) return null;
+const ReciboVenda = ({ sale }) => {
+    if (!sale) return null;
 
-    const { items, subtotal, discountPercentage, discountValue, total, date, customer, paymentMethod, customerCpf, customerPhone, customerEmail, receiptCode } = saleDetails;
+    const { items, subtotal, discountPercentage, discountValue, total, date, customer, paymentMethod, customerCpf, customerPhone, customerEmail, receiptCode } = sale;
 
     return (
         <div className="p-8 bg-white text-black font-mono text-xs">
