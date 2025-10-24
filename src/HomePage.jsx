@@ -144,7 +144,7 @@ const HomePage = ({ onLoginClick }) => {
                 setAllProducts(products);
 
                 const allItems = [...products.map(p => ({...p, type: 'produto'})), ...services.map(s => ({...s, type: 'serviço'}))];
-                const offers = allItems.filter(item => item.is_offer);
+                const offers = allItems.filter(item => item.oferta === true);
                 setOfferProducts(offers);
                 
             } catch (error) {
