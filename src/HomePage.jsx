@@ -240,7 +240,8 @@ const HomePage = ({ onLoginClick }) => {
                                         product={{
                                             ...item,
                                             name: item.nome || item.servico,
-                                            price: item.precoFinal
+                                            price: item.precoFinal,
+                                            image: item.imagem // Corrigindo o nome da propriedade da imagem
                                         }} 
                                         onComprarClick={handleComprarClick} />
                                 ))}
