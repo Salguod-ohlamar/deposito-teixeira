@@ -993,7 +993,7 @@ app.post('/api/sales', protect, async (req, res) => {
             clientId = null; // Venda sem cliente associado
         }
 
-        const receiptCode = `BC-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        const receiptCode = `TX-${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         const saleQuery = `
             INSERT INTO sales (receipt_code, client_id, user_id, vendedor_name, subtotal, discount_percentage, discount_value, total, payment_method)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
