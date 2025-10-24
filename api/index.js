@@ -71,7 +71,7 @@ app.get('/api/products/search', protect, async (req, res) => {
             fornecedor: p.fornecedor, emEstoque: p.em_estoque, qtdaMinima: p.qtda_minima,
             preco: parseFloat(String(p.preco).replace(',', '.')), precoFinal: parseFloat(String(p.preco_final).replace(',', '.')),
             markup: p.markup, imagem: p.imagem, destaque: !!p.destaque,
-            is_offer: !!p.is_offer,
+            oferta: !!p.oferta,
             tempoDeGarantia: p.tempo_de_garantia, historico: p.historico,
         }));
         res.json(products);
@@ -88,7 +88,7 @@ app.get('/api/products/search', protect, async (req, res) => {
 // Rota para criar um novo serviço
 app.post('/api/services', protect, hasPermission('addService'), async (req, res) => {
     const {
-        servico, fornecedor, marca, tipoReparo, tecnico, is_offer,
+        servico, fornecedor, marca, tipoReparo, tecnico, oferta,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia
     } = req.body;
 
@@ -98,10 +98,10 @@ app.post('/api/services', protect, hasPermission('addService'), async (req, res)
 
     try {
         const query = `
-            INSERT INTO services (
-                servico, fornecedor, marca, tipo_reparo, tecnico, is_offer,
-                preco, preco_final, markup, imagem, destaque, tempo_de_garantia, historico
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            INSERT INTO services ( 
+                servico, fornecedor, marca, tipo_reparo, tecnico, oferta,
+                preco, preco_final, markup, imagem, destaque, tempo_de_garantia, historico 
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
             RETURNING *;
         `;
         const historicoInicial = [{
@@ -111,8 +111,8 @@ app.post('/api/services', protect, hasPermission('addService'), async (req, res)
         }];
 
         const values = [
-            servico, fornecedor, marca, tipoReparo, tecnico, !!is_offer,
-            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
+            servico, fornecedor, marca, tipoReparo, tecnico, !!oferta,
+            parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, 
             JSON.stringify(historicoInicial)
         ];
 
@@ -126,8 +126,8 @@ app.post('/api/services', protect, hasPermission('addService'), async (req, res)
             fornecedor: newService.fornecedor,
             marca: newService.marca,
             tipoReparo: newService.tipo_reparo,
-            tecnico: newService.tecnico,
-            is_offer: !!newService.is_offer,
+            tecnico: newService.tecnico, 
+            oferta: !!newService.oferta,
             preco: parseFloat(newService.preco),
             precoFinal: parseFloat(newService.preco_final),
             markup: newService.markup,
@@ -147,24 +147,24 @@ app.post('/api/services', protect, hasPermission('addService'), async (req, res)
 app.put('/api/services/:id', protect, hasPermission('editService'), async (req, res) => {
     const { id } = req.params;
     const {
-        servico, fornecedor, marca, tipoReparo, tecnico, is_offer,
+        servico, fornecedor, marca, tipoReparo, tecnico, oferta,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
     const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup); // Garante que markup inválido vire null
 
     try {
         const query = `
-            UPDATE services SET
-                servico = $1, fornecedor = $2, marca = $3, tipo_reparo = $4, tecnico = $5,
-                preco = $6, preco_final = $7, markup = $8, imagem = $9, destaque = $10, tempo_de_garantia = $11,
-                historico = $12, is_offer = $13, updated_at = NOW()
-            WHERE id = $14
+            UPDATE services SET 
+                servico = $1, fornecedor = $2, marca = $3, tipo_reparo = $4, tecnico = $5, 
+                preco = $6, preco_final = $7, markup = $8, imagem = $9, destaque = $10, tempo_de_garantia = $11, 
+                historico = $12, oferta = $13, updated_at = NOW()
+            WHERE id = $14 
             RETURNING *;
         `;
         const values = [
             servico, fornecedor, marca, tipoReparo, tecnico,
-            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
-            JSON.stringify(historico), !!is_offer,
+            parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0, 
+            JSON.stringify(historico), !!oferta,
             id,
         ];
 
@@ -174,9 +174,9 @@ app.put('/api/services/:id', protect, hasPermission('editService'), async (req, 
         
         const updatedService = rows[0];
         res.json({
-            id: updatedService.id, servico: updatedService.servico, fornecedor: updatedService.fornecedor,
-            marca: updatedService.marca, tipoReparo: updatedService.tipo_reparo, tecnico: updatedService.tecnico,
-            is_offer: !!updatedService.is_offer, preco: parseFloat(updatedService.preco), precoFinal: parseFloat(updatedService.preco_final),
+            id: updatedService.id, servico: updatedService.servico, fornecedor: updatedService.fornecedor, 
+            marca: updatedService.marca, tipoReparo: updatedService.tipo_reparo, tecnico: updatedService.tecnico, 
+            oferta: !!updatedService.oferta, preco: parseFloat(updatedService.preco), precoFinal: parseFloat(updatedService.preco_final),
             markup: updatedService.markup, imagem: updatedService.imagem, destaque: !!updatedService.destaque,
             tempoDeGarantia: updatedService.tempo_de_garantia, historico: updatedService.historico,
         });
@@ -225,8 +225,8 @@ app.get('/api/services', async (req, res) => {
         preco: parseFloat(String(s.preco).replace(',', '.')),
         precoFinal: parseFloat(String(s.preco_final).replace(',', '.')),
         markup: s.markup,
-        imagem: s.imagem,
-        is_offer: !!s.is_offer,
+        imagem: s.imagem, 
+        oferta: !!s.oferta,
         destaque: s.destaque,
         tempoDeGarantia: s.tempo_de_garantia,
         historico: s.historico,
@@ -249,8 +249,8 @@ app.get('/api/services/search', protect, async (req, res) => {
         const { rows } = await db.query(queryText, [`%${q}%`]);
         const services = rows.map(s => ({
             id: s.id, servico: s.servico, fornecedor: s.fornecedor, marca: s.marca,
-            tipoReparo: s.tipo_reparo, tecnico: s.tecnico, preco: parseFloat(s.preco),
-            is_offer: !!s.is_offer, precoFinal: parseFloat(String(s.preco_final).replace(',', '.')), markup: s.markup, imagem: s.imagem,
+            tipoReparo: s.tipo_reparo, tecnico: s.tecnico, preco: parseFloat(s.preco), 
+            oferta: !!s.oferta, precoFinal: parseFloat(String(s.preco_final).replace(',', '.')), markup: s.markup, imagem: s.imagem,
             destaque: !!s.destaque, tempoDeGarantia: s.tempo_de_garantia, historico: s.historico,
         }));
         res.json(services);
@@ -355,7 +355,7 @@ app.delete('/api/banners/:id', protect, hasPermission('manageBanners'), async (r
 // Rota para criar um novo produto
 app.post('/api/products', protect, hasPermission('addProduct'), async (req, res) => {
     const {
-        nome, categoria, marca, fornecedor, emEstoque, qtdaMinima, is_offer,
+        nome, categoria, marca, fornecedor, emEstoque, qtdaMinima, oferta,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia
     } = req.body;
 
@@ -365,10 +365,10 @@ app.post('/api/products', protect, hasPermission('addProduct'), async (req, res)
 
     try {
         const query = `
-            INSERT INTO products (
-                nome, categoria, marca, fornecedor, em_estoque, qtda_minima, is_offer,
-                preco, preco_final, markup, imagem, destaque, tempo_de_garantia, historico
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            INSERT INTO products ( 
+                nome, categoria, marca, fornecedor, em_estoque, qtda_minima, oferta,
+                preco, preco_final, markup, imagem, destaque, tempo_de_garantia, historico 
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
             RETURNING *;
         `;
         const historicoInicial = [{
@@ -378,7 +378,7 @@ app.post('/api/products', protect, hasPermission('addProduct'), async (req, res)
         }];
 
         const values = [
-            nome, categoria, marca, fornecedor, parseInt(emEstoque, 10), parseInt(qtdaMinima, 10), !!is_offer,
+            nome, categoria, marca, fornecedor, parseInt(emEstoque, 10), parseInt(qtdaMinima, 10), !!oferta,
             parseFloat(preco), parseFloat(precoFinal), markup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
             JSON.stringify(historicoInicial)
         ];
@@ -398,8 +398,8 @@ app.post('/api/products', protect, hasPermission('addProduct'), async (req, res)
             preco: parseFloat(newProduct.preco),
             precoFinal: parseFloat(newProduct.preco_final),
             markup: newProduct.markup,
-            imagem: newProduct.imagem,
-            is_offer: !!newProduct.is_offer,
+            imagem: newProduct.imagem, 
+            oferta: !!newProduct.oferta,
             destaque: newProduct.destaque,
             tempoDeGarantia: newProduct.tempo_de_garantia,
             historico: newProduct.historico,
@@ -415,7 +415,7 @@ app.post('/api/products', protect, hasPermission('addProduct'), async (req, res)
 app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, res) => {
     const { id } = req.params;
     const {
-        nome, categoria, marca, fornecedor, emEstoque, em_estoque, qtdaMinima, is_offer,
+        nome, categoria, marca, fornecedor, emEstoque, em_estoque, qtdaMinima, oferta,
         preco, precoFinal, markup, imagem, destaque, tempoDeGarantia, historico
     } = req.body;
     const parsedMarkup = isNaN(parseFloat(markup)) ? null : parseFloat(markup); // Garante que markup inválido vire null
@@ -425,14 +425,14 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             UPDATE products SET
                 nome = $1, categoria = $2, marca = $3, fornecedor = $4, em_estoque = $5, qtda_minima = $6,
                 preco = $7, preco_final = $8, markup = $9, imagem = $10, destaque = $11, tempo_de_garantia = $12,
-                historico = $13, is_offer = $14, updated_at = NOW()
+                historico = $13, oferta = $14, updated_at = NOW()
             WHERE id = $15
             RETURNING *;
         `;
         const values = [
             nome, categoria, marca, fornecedor, parseInt(emEstoque || em_estoque, 10), parseInt(qtdaMinima, 10),
             parseFloat(preco), parseFloat(precoFinal), parsedMarkup, imagem, !!destaque, parseInt(tempoDeGarantia, 10) || 0,
-            JSON.stringify(historico), !!is_offer,
+            JSON.stringify(historico), !!oferta,
             id
         ];
 
@@ -453,7 +453,7 @@ app.put('/api/products/:id', protect, hasPermission('editProduct'), async (req, 
             precoFinal: parseFloat(updatedProduct.preco_final),
             markup: updatedProduct.markup,
             imagem: updatedProduct.imagem,
-            is_offer: !!updatedProduct.is_offer,
+            oferta: !!updatedProduct.oferta,
             destaque: !!updatedProduct.destaque,
             tempoDeGarantia: updatedProduct.tempo_de_garantia,
             historico: updatedProduct.historico,
