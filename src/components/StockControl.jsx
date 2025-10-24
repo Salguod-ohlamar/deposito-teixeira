@@ -583,8 +583,8 @@ const StockControl = ({ onLogout, currentUser }) => {
                     </label>
                 </div>
                  <div className="md:col-span-2 flex items-center p-3 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
-                    <label htmlFor="edit-is_offer" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
-                        <input id="edit-is_offer" name="is_offer" type="checkbox" checked={editingProduct.is_offer} onChange={handleEditInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
+                    <label htmlFor="edit-oferta" className="flex items-center gap-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input id="edit-oferta" name="oferta" type="checkbox" checked={!!editingProduct.oferta} onChange={handleEditInputChange} className="form-checkbox h-5 w-5 text-red-500 bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 rounded focus:ring-red-500" />
                         Marcar como Oferta
                     </label>
                 </div>
