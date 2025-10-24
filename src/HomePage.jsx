@@ -304,7 +304,8 @@ const HomePage = ({ onLoginClick }) => {
                                         ...product,
                                         name: product.nome,
                                         price: product.precoFinal,
-                                        description: `Marca: ${product.marca}`
+                                        description: `Marca: ${product.marca}`,
+                                        image: product.imagem // Corrigindo o nome da propriedade da imagem
                                     }} 
                                     onComprarClick={handleComprarClick} 
                                 />
