@@ -38,7 +38,7 @@ app.get('/api/products', async (req, res) => {
         precoFinal: parseFloat(String(p.preco_final).replace(',', '.')),
         markup: p.markup,
         imagem: p.imagem,
-        is_offer: !!p.is_offer,
+        oferta: !!p.oferta,
         destaque: !!p.destaque,
         tempoDeGarantia: p.tempo_de_garantia,
         historico: p.historico,
@@ -65,7 +65,8 @@ app.get('/api/products/search', protect, async (req, res) => {
             LIMIT 20;
         `;
         const { rows } = await db.query(queryText, [`%${q}%`]);
-        
+
+        //Marcação para os campo na tabela produtos        
         const products = rows.map(p => ({
             id: p.id, nome: p.nome, categoria: p.categoria, marca: p.marca,
             fornecedor: p.fornecedor, emEstoque: p.em_estoque, qtdaMinima: p.qtda_minima,
