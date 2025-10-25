@@ -17,7 +17,6 @@ import elginLogo from './image/elgin.png';
 import oroluxLogo from './image/orolux.png';
 import votoranLogo from './image/votorantim.png';
 import caueLogo from './image/caue.png';
-import logoTeixeira from './image/logo_teixeira.png';
 
 //Import do logo das categorias
 import tintas from './image/pintura.jpg';
@@ -185,11 +184,11 @@ const HomePage = ({ onLoginClick }) => {
     
     return (
         <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
-            <header className="sticky top-0 z-50 bg-gray-800 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-700 dark:border-gray-800">
+            <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
                 {/* <TopBar /> */}
                 <div className="container mx-auto flex items-center justify-between p-4 gap-4">
                     <a href="/" className="flex items-center">
-                        <img src={logoTeixeira} alt="Teixeira Depósito de Materiais" className="h-16" />
+                        <h1 className="text-2xl lg:text-3xl font-bold tracking-wider text-white">Teixeira Depósito de Materiais</h1>
                     </a>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
