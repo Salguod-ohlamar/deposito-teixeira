@@ -281,7 +281,7 @@ const HomePage = ({ onLoginClick }) => {
                     <div className="mb-6 md:mb-0">
                         <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Atendimento</h4>
                         <p className="text-sm">Seg. a Sáb. das 8h às 18h</p>
-                        <p className="text-sm">(11) 0000-0000</p>
+                        <a href="tel:+5511941341795" className="text-sm hover:text-gray-900 dark:hover:text-white transition-colors">(11) 94134-1795</a>
                     </div>
                 </div>
                 <div className="border-t border-gray-300 dark:border-gray-800 mt-8 pt-6 text-center text-sm">
