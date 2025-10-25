@@ -17,20 +17,13 @@ import elginLogo from './image/elgin.png';
 import oroluxLogo from './image/orolux.png';
 import votoranLogo from './image/votorantim.png';
 import caueLogo from './image/caue.png';
-
-
 import logoTeixeira from './image/logo_teixeira.png';
-
 
 //Import do logo das categorias
 import tintas from './image/pintura.jpg';
 import ferramentas from './image/ferramentas.jpg';
 import eletrica from './image/eletrica.jpg';
 import hidraulica from './image/hidraulicai.jpg';
-import tintas from './images/pintura.jpg';
-import ferramentas from './images/ferramentas.jpg';
-import eletrica from './images/eletrica.jpg';
-import hidraulica from './images/hidraulicai.jpg';
 // --- Componentes de UI específicos para a nova Home ---
 
 /**
@@ -192,22 +185,18 @@ const HomePage = ({ onLoginClick }) => {
     
     return (
         <div className="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
-            <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
             <header className="sticky top-0 z-50 bg-gray-800 dark:bg-gray-900/90 backdrop-blur-sm border-b border-gray-700 dark:border-gray-800">
                 {/* <TopBar /> */}
                 <div className="container mx-auto flex items-center justify-between p-4 gap-4">
                     <a href="/" className="flex items-center">
-                        <img src={logoTeixeira} alt="Teixeira Depósito de Materiais" className="h-10" />
                         <img src={logoTeixeira} alt="Teixeira Depósito de Materiais" className="h-16" />
                     </a>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
-                        <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex text-white hover:bg-white/20">
                         <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex text-white hover:bg-white/10">
                             <User size={24} className="text-white" />
                         </Button>
                         <div className="lg:hidden">
-                            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu"><Menu size={24} /></Button>
                             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)} aria-label="Abrir menu" className="text-white hover:bg-white/10"><Menu size={24} /></Button>
                         </div>
                     </div>
