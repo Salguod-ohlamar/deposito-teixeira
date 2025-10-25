@@ -18,6 +18,7 @@ import oroluxLogo from './image/orolux.png';
 import votoranLogo from './image/votorantim.png';
 import caueLogo from './image/caue.png';
 
+import logoTeixeira from './image/logo_teixeira.png';
 
 //Import do logo das categorias
 import tintas from './image/pintura.jpg';
@@ -188,7 +189,9 @@ const HomePage = ({ onLoginClick }) => {
             <header className="sticky top-0 z-50 bg-red-700 dark:bg-red-800/90 backdrop-blur-sm border-b border-red-800 dark:border-red-900">
                 {/* <TopBar /> */}
                 <div className="container mx-auto flex items-center justify-between p-4 gap-4">
-                    <div className="text-xl lg:text-2xl font-bold tracking-wider text-white whitespace-nowrap"><a href="/">Teixeira Depósito de Materiais</a></div>
+                    <a href="/" className="flex items-center">
+                        <img src={logoTeixeira} alt="Teixeira Depósito de Materiais" className="h-10" />
+                    </a>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
                         <Button variant="ghost" size="icon" onClick={onLoginClick} aria-label="Acessar conta" className="hidden md:flex text-white hover:bg-white/20">
